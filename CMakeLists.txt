@@ -19,13 +19,53 @@ find_package(aaveq_ros_interfaces REQUIRED)
 
 ############################################################################
 
+# FetchContent
+
+include(FetchContent)
+
+FetchContent_Declare(
+  eigen
+  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+  GIT_TAG master 
+  )
+
+FetchContent_MakeAvailable(eigen)
+  
+############################################################################
+
 # Library
 
+include_directories(include)
+
+install(
+  DIRECTORY include/usv_sim_2d
+  DESTINATION include)
+
+add_library(usv_sim_2d src/usv_sim_2d.cpp)
+target_link_libraries(usv_sim_2d eigen)
+ament_export_targets(usv_sim_2d HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS usv_sim_2d
+  EXPORT usv_sim_2d
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
 
 ############################################################################
 
 # Nodes (C++)
 
+# sim
+add_executable(sim nodes/sim.cpp)
+ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
+target_link_libraries(sim usv_sim_2d)
+
+
+install(TARGETS
+  sim
+DESTINATION lib/${PROJECT_NAME})
 
 ############################################################################
 

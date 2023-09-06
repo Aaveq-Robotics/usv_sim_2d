@@ -6,6 +6,8 @@
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/point.hpp>
 
+#include <SFML/Graphics.hpp>
+
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
 #include "usv_sim_2d/usv.hpp"
@@ -25,7 +27,12 @@ public:
         publisher_sim_state_ = this->create_publisher<aaveq_ros_interfaces::msg::SimState>("sim_state", 1);
 
         /***** Timers *****/
-        timer_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / sim_freq_), std::bind(&Sim::callback_timer, this));
+        timer_sim_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / sim_freq_), std::bind(&Sim::callback_timer_sim, this));
+        timer_window_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / 60), std::bind(&Sim::callback_timer_window, this));
+
+        /***** Init Variables *****/
+        window.create(sf::VideoMode(800, 600), "My window");
+        window.setFramerateLimit(60);
     }
 
 private:
@@ -36,9 +43,12 @@ private:
     // Node variables
     rclcpp::Subscription<aaveq_ros_interfaces::msg::ControlOutput>::SharedPtr subscriber_control_output_;
     rclcpp::Publisher<aaveq_ros_interfaces::msg::SimState>::SharedPtr publisher_sim_state_;
-    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::TimerBase::SharedPtr timer_sim_;
+    rclcpp::TimerBase::SharedPtr timer_window_;
 
     // Variables
+    sf::RenderWindow window;
+
     USV usv_;
     std::array<uint16_t, 16> servo_out_;
 
@@ -49,7 +59,7 @@ private:
                   servo_out_.begin());
     }
 
-    void callback_timer()
+    void callback_timer_sim()
     {
         // calc rover physics
         if (!usv_.update(servo_out_))
@@ -84,6 +94,18 @@ private:
         msg_state.velocity.z = usv_.state.velocity[2];
 
         publisher_sim_state_->publish(msg_state);
+    }
+
+    void callback_timer_window()
+    {
+        for (auto event = sf::Event{}; window.pollEvent(event);)
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+        window.clear();
+        window.display();
     }
 };
 

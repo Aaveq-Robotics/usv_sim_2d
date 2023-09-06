@@ -19,7 +19,7 @@ find_package(aaveq_ros_interfaces REQUIRED)
 
 ############################################################################
 
-# FetchContent
+# External Libraries
 
 include(FetchContent)
 
@@ -29,11 +29,15 @@ FetchContent_Declare(
   GIT_TAG master 
   )
 
-FetchContent_MakeAvailable(eigen)
+FetchContent_Declare(sfml
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.x)
+
+FetchContent_MakeAvailable(eigen sfml)
   
 ############################################################################
 
-# Library
+# Libraries
 
 include_directories(include)
 
@@ -60,7 +64,7 @@ install(
 # sim
 add_executable(sim nodes/sim.cpp)
 ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
-target_link_libraries(sim usv)
+target_link_libraries(sim usv sfml-graphics)
 
 
 install(TARGETS

@@ -41,13 +41,13 @@ install(
   DIRECTORY include/usv_sim_2d
   DESTINATION include)
 
-add_library(usv_sim_2d src/usv_sim_2d.cpp)
-target_link_libraries(usv_sim_2d eigen)
-ament_export_targets(usv_sim_2d HAS_LIBRARY_TARGET)
+add_library(usv src/usv.cpp)
+target_link_libraries(usv eigen)
+ament_export_targets(usv HAS_LIBRARY_TARGET)
 
 install(
-  TARGETS usv_sim_2d
-  EXPORT usv_sim_2d
+  TARGETS usv
+  EXPORT usv
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -60,7 +60,7 @@ install(
 # sim
 add_executable(sim nodes/sim.cpp)
 ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
-target_link_libraries(sim usv_sim_2d)
+target_link_libraries(sim usv)
 
 
 install(TARGETS

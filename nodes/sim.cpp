@@ -8,7 +8,7 @@
 
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
-#include "usv_sim_2d/usv_sim_2d.hpp"
+#include "usv_sim_2d/usv.hpp"
 
 class Sim : public rclcpp::Node
 {

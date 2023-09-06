@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "usv_sim_2d/usv_sim_2d.hpp"
+#include "usv_sim_2d/usv.hpp"
 
 USV::USV()
 {
@@ -21,28 +21,25 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
         2. steering (really just turn rate omega)
      */
 
-    if (servo_out[2] == 0)
-        return false;
-
     state.timestamp = USV::micros(); // TODO: Timestamp needs to be double!!
     double timestep = state.timestamp - state_old.timestamp;
 
     if (timestep < 0)
     {
         // the sim is trying to go backwards in time
-        std::cout << "[simpleRover] Error: Time went backwards" << std::endl;
+        std::cout << "[USV] Error: Time went backwards" << std::endl;
         return false;
     }
     else if (timestep == 0)
     {
         // time did not advance. no physics step
-        std::cout << "[simpleRover] Warning: Time did not step forward" << std::endl;
+        std::cout << "[USV] Warning: Time did not step forward" << std::endl;
         return false;
     }
     else if (timestep > 60)
     {
         // limiting timestep to less than 1 minute
-        std::cout << "[simpleRover] Warning: Time step was very large" << std::endl;
+        std::cout << "[USV] Warning: Time step was very large" << std::endl;
         return false;
     }
 

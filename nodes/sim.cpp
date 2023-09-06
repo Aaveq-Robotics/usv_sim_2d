@@ -26,9 +26,6 @@ public:
 
         /***** Timers *****/
         timer_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / sim_freq_), std::bind(&Sim::callback_timer, this));
-
-        /***** Variables *****/
-        servo_out_.fill(1500);
     }
 
 private:
@@ -87,11 +84,6 @@ private:
         msg_state.velocity.z = usv_.state.velocity[2];
 
         publisher_sim_state_->publish(msg_state);
-
-        // Debugging
-        RCLCPP_INFO_STREAM(get_logger(), " ------ " << msg_state.timestamp << " ------ ");
-        for (auto i : servo_out_)
-            RCLCPP_INFO_STREAM(get_logger(), i << " ");
     }
 };
 

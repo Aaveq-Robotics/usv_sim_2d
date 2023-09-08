@@ -4,9 +4,6 @@ Visualisation::Visualisation()
 {
     window_.create(sf::VideoMode(800, 600), "USV Simulaiton 2D");
     window_.setFramerateLimit(60);
-
-    shape_.setRadius(50.f);
-    shape_.setFillColor(sf::Color(255, 250, 50));
 }
 
 void Visualisation::update()
@@ -17,13 +14,10 @@ void Visualisation::update()
             window_.close();
     }
 
-    sf::Vector2f pos = shape_.getPosition();
-    shape_.setPosition(pos.x + 1.0, pos.y + 1.0);
     // Compute middle of window
     sf::Vector2u size = window_.getSize();
     origin_offset = {(float)size.x / 2, (float)size.y / 2};
 
     window_.clear(sf::Color{180, 220, 240});
-    window_.draw(shape_);
     window_.display();
 }

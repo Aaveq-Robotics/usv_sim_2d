@@ -62,10 +62,11 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
-uint64_t USV::micros()
+double USV::micros()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    return (double)us / 1000000.0;
+    return (double)us / 1000000.0; // Convert to seconds
+}
 }
 
 double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)

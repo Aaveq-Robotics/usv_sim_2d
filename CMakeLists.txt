@@ -57,6 +57,17 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
+  add_library(diff_drive src/diff_drive.cpp)
+  target_link_libraries(diff_drive usv eigen)
+  ament_export_targets(diff_drive HAS_LIBRARY_TARGET)
+  
+  install(
+    TARGETS diff_drive
+    EXPORT diff_drive
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include)
 ############################################################################
 
 # Nodes (C++)

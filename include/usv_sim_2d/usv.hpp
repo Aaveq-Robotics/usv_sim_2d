@@ -21,8 +21,9 @@ public:
 
     bool update(std::array<uint16_t, 16> servo_out);
 
-private:
+protected:
     uint64_t micros();
 
-    double _interp1D(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
+private:
+    double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
 };

@@ -45,7 +45,7 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
 
     // how fast is the rover moving
     double max_velocity = 1.0; // m/s
-    double body_v = _interp1D(servo_out[2], 1100.0, 1900.0, -max_velocity, max_velocity);
+    double body_v = interval_map(servo_out[2], 1100.0, 1900.0, -max_velocity, max_velocity);
 
     // update the state
     state.velocity[0] = body_v;
@@ -68,7 +68,7 @@ uint64_t USV::micros()
     return (double)us / 1000000.0;
 }
 
-double USV::_interp1D(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
+double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
 {
     return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0);
 }

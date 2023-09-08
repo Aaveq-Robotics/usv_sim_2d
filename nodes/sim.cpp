@@ -10,7 +10,7 @@
 
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
-#include "usv_sim_2d/usv.hpp"
+#include "usv_sim_2d/diff_drive.hpp"
 
 class Sim : public rclcpp::Node
 {
@@ -49,7 +49,7 @@ private:
     // Variables
     sf::RenderWindow window;
 
-    USV usv_;
+    DiffDrive usv_;
     std::array<uint16_t, 16> servo_out_;
 
     /***** Callbacks *****/
@@ -73,9 +73,9 @@ private:
 
         msg_state.timestamp = usv_.state.timestamp;
 
-        msg_state.gyro.x = usv_.state.gyro[0];
-        msg_state.gyro.y = usv_.state.gyro[1];
-        msg_state.gyro.z = usv_.state.gyro[2];
+        msg_state.gyro.x = usv_.state.gyro[0]; // Roll
+        msg_state.gyro.y = usv_.state.gyro[1]; // Pitch
+        msg_state.gyro.z = usv_.state.gyro[2]; // Yaw
 
         msg_state.accel.x = usv_.state.accel[0];
         msg_state.accel.y = usv_.state.accel[1];
@@ -85,9 +85,9 @@ private:
         msg_state.position.y = usv_.state.position[1];
         msg_state.position.z = usv_.state.position[2];
 
-        msg_state.attitude.x = usv_.state.attitude[0];
-        msg_state.attitude.y = usv_.state.attitude[1];
-        msg_state.attitude.z = usv_.state.attitude[2];
+        msg_state.attitude.x = usv_.state.attitude[0]; // Roll
+        msg_state.attitude.y = usv_.state.attitude[1]; // Pitch
+        msg_state.attitude.z = usv_.state.attitude[2]; // Yaw
 
         msg_state.velocity.x = usv_.state.velocity[0];
         msg_state.velocity.y = usv_.state.velocity[1];

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "usv_sim_2d/usv.hpp"
 
 class DiffDrive : public USV

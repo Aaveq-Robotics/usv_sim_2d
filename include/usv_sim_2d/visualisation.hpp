@@ -2,13 +2,15 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "usv_sim_2d/diff_drive.hpp"
+
 class Visualisation
 {
 public:
     Visualisation();
     ~Visualisation() {}
 
-    void update();
+    void update(DiffDrive &vehice);
 
 private:
     sf::RenderWindow window_;

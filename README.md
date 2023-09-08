@@ -3,6 +3,12 @@
 Simlation of the rigid body dynamics of a simple differential drive USV in 2D, in ROS 2 (Humble).
 
 ## Requirements
+Tested with:
+- Ubuntu 22.04
+- ROS 2 (Humble Hawksbill)
+
+---
+
 This package uses [SFML](https://www.sfml-dev.org/index.php) and [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page), which are build alongside this package using CMake's FetchContent.
 SFML depends on system packages which have to be installed before building this package:
 
@@ -45,4 +51,9 @@ colcon build
 
 
 ## Usage
+
+Run the node after sourcing the workspace:
+```
+ros2 run usv_sim_2d sim
+```
 

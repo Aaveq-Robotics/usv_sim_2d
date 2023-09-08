@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "usv_sim_2d/visualisation.hpp"
 
 Visualisation::Visualisation()
@@ -13,7 +15,10 @@ void Visualisation::update(DiffDrive &vehice)
     for (auto event = sf::Event{}; window_.pollEvent(event);)
     {
         if (event.type == sf::Event::Closed)
+        {
+            std::cout << "Closing window, simulation is still running" << '\n';
             window_.close();
+        }
     }
 
     // Compute middle of window

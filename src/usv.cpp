@@ -78,6 +78,22 @@ double USV::update_timestamp()
     return timestep;
 }
 
+Eigen::Matrix3d USV::inertia_matrix()
+{
+    auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
+    {
+        return Eigen::Matrix3d{{std::pow(y, 2) + std::pow(z, 2), -x * y, -x * z},
+                               {-x * y, std::pow(x, 2) + std::pow(z, 2), -y * z},
+                               {-x * z, -y * z, std::pow(x, 2) + std::pow(y, 2)}};
+    };
+
+    Eigen::Matrix3d I;
+    for (auto p : point_list)
+        I += p.m * inertia(p.x, p.y, p.z);
+
+    return I;
+}
+
 double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
 {
     return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0);

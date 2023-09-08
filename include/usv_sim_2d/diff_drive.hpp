@@ -8,7 +8,7 @@ public:
     DiffDrive();
     ~DiffDrive() {}
 
-    // bool update(std::array<uint16_t, 16> servo_out);
+    bool update(std::array<uint16_t, 16> servo_out);
 
 private:
 };

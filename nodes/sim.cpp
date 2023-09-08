@@ -6,10 +6,9 @@
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/point.hpp>
 
-#include <SFML/Graphics.hpp>
-
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
+#include "usv_sim_2d/visualisation.hpp"
 #include "usv_sim_2d/diff_drive.hpp"
 
 class Sim : public rclcpp::Node
@@ -31,8 +30,6 @@ public:
         timer_window_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / 60), std::bind(&Sim::callback_timer_window, this));
 
         /***** Init Variables *****/
-        window.create(sf::VideoMode(800, 600), "My window");
-        window.setFramerateLimit(60);
     }
 
 private:
@@ -47,7 +44,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_window_;
 
     // Variables
-    sf::RenderWindow window;
+    Visualisation window_;
 
     DiffDrive usv_;
     std::array<uint16_t, 16> servo_out_;
@@ -98,14 +95,7 @@ private:
 
     void callback_timer_window()
     {
-        for (auto event = sf::Event{}; window.pollEvent(event);)
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        window.clear();
-        window.display();
+        window_.update();
     }
 };
 

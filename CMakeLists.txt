@@ -68,6 +68,19 @@ install(
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     INCLUDES DESTINATION include)
+
+    add_library(visualisation src/visualisation.cpp)
+    target_link_libraries(visualisation diff_drive eigen sfml-graphics)
+    ament_export_targets(visualisation HAS_LIBRARY_TARGET)
+    
+    install(
+      TARGETS visualisation
+      EXPORT visualisation
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
+      RUNTIME DESTINATION bin
+      INCLUDES DESTINATION include)
+
 ############################################################################
 
 # Nodes (C++)
@@ -75,7 +88,7 @@ install(
 # sim
 add_executable(sim nodes/sim.cpp)
 ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
-target_link_libraries(sim usv sfml-graphics)
+target_link_libraries(sim diff_drive visualisation)
 
 
 install(TARGETS

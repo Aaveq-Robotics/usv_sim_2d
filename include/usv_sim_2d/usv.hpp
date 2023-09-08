@@ -18,6 +18,8 @@ public:
         Eigen::Vector3d velocity;
     } state, state_old;
 
+    std::vector<Eigen::Vector3d> point_list;
+
     USV();
     ~USV() {}
 

@@ -92,8 +92,12 @@ Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
     return I;
 }
 
-Eigen::Matrix3d USV::rotation_matrix_eb(double phi, double theta, double psi)
+Eigen::Matrix3d USV::rotation_matrix_eb(Eigen::Vector3d attitude)
 {
+    double phi = attitude.x();
+    double theta = attitude.y();
+    double psi = attitude.z();
+
     // Rotation of earth-fixed (NED) frame with respect to body-fixed frame
     Eigen::Matrix3d Rx{{1, 0, 0}, {0, cos(phi), -sin(phi)}, {0, sin(phi), cos(phi)}};
     Eigen::Matrix3d Ry{{cos(theta), 0, sin(theta)}, {0, 1, 0}, {-sin(theta), 0, cos(theta)}};
@@ -102,8 +106,11 @@ Eigen::Matrix3d USV::rotation_matrix_eb(double phi, double theta, double psi)
     return Rz * Ry * Rx;
 }
 
-Eigen::Matrix3d transformation_matrix(double phi, double theta)
+Eigen::Matrix3d USV::transformation_matrix(Eigen::Vector3d attitude)
 {
+    double phi = attitude.x();
+    double theta = attitude.y();
+
     return Eigen::Matrix3d{{1, sin(phi) * (sin(theta) / cos(theta)), cos(phi) * (sin(theta) / cos(theta))},
                            {0, cos(phi), -sin(phi)},
                            {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};

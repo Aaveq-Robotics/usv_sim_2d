@@ -40,8 +40,8 @@ protected:
     // Member functions
     std::vector<PointMass> recompute_relative_to_origin(std::vector<PointMass> points);
     Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);
-    Eigen::Matrix3d rotation_matrix_eb(double phi, double theta, double psi);
-    Eigen::Matrix3d transformation_matrix(double phi, double theta);
+    Eigen::Matrix3d rotation_matrix_eb(Eigen::Vector3d attitude);
+    Eigen::Matrix3d transformation_matrix(Eigen::Vector3d attitude);
     double micros();
     double update_timestamp();
 

@@ -26,7 +26,8 @@ public:
         double z;
     };
 
-    std::vector<PointMass> point_list_;
+    std::vector<PointMass> point_list_body_;
+    std::vector<Eigen::Vector3d> point_list_earth_;
 
     USV();
     ~USV() {}

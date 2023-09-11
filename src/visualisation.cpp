@@ -28,11 +28,11 @@ void Visualisation::update(DiffDrive &vehice)
     // Draw points
     window_.clear(sf::Color{180, 220, 240});
 
-    for (DiffDrive::PointMass point : vehice.point_list_)
+    for (Eigen::Vector3d point : vehice.point_list_earth_)
     {
         sf::CircleShape shape(5.f);
         shape.setFillColor(sf::Color(255, 50, 50));
-        shape.setPosition(origin_offset.x + point.x + vehice.state.position.x(), origin_offset.y + point.y + vehice.state.position.y());
+        shape.setPosition(origin_offset.x + point.x() + vehice.state.position.x(), origin_offset.y + point.y() + vehice.state.position.y());
         window_.draw(shape);
     }
 

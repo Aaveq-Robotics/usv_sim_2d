@@ -61,6 +61,16 @@ Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
     return I;
 }
 
+Eigen::Matrix3d USV::rotation_matrix_eb(double phi, double theta, double psi)
+{
+    // Rotation of earth-fixed (NED) frame with respect to body-fixed frame
+    Eigen::Matrix3d Rx{{1, 0, 0}, {0, cos(phi), -sin(phi)}, {0, sin(phi), cos(phi)}};
+    Eigen::Matrix3d Ry{{cos(theta), 0, sin(theta)}, {0, 1, 0}, {-sin(theta), 0, cos(theta)}};
+    Eigen::Matrix3d Rz{{cos(psi), -sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
+
+    return Rz * Ry * Rx;
+}
+
 double USV::micros()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();

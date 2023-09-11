@@ -39,6 +39,7 @@ protected:
 
     // Member functions
     Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);
+    Eigen::Matrix3d rotation_matrix_eb(double phi, double theta, double psi);
     double micros();
     double update_timestamp();
 

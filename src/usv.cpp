@@ -45,6 +45,22 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
+Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
+{
+    auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
+    {
+        return Eigen::Matrix3d{{std::pow(y, 2) + std::pow(z, 2), -x * y, -x * z},
+                               {-x * y, std::pow(x, 2) + std::pow(z, 2), -y * z},
+                               {-x * z, -y * z, std::pow(x, 2) + std::pow(y, 2)}};
+    };
+
+    Eigen::Matrix3d I;
+    for (auto p : points)
+        I += p.m * inertia(p.x, p.y, p.z);
+
+    return I;
+}
+
 double USV::micros()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
@@ -76,22 +92,6 @@ double USV::update_timestamp()
     }
 
     return timestep;
-}
-
-Eigen::Matrix3d USV::inertia_matrix()
-{
-    auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
-    {
-        return Eigen::Matrix3d{{std::pow(y, 2) + std::pow(z, 2), -x * y, -x * z},
-                               {-x * y, std::pow(x, 2) + std::pow(z, 2), -y * z},
-                               {-x * z, -y * z, std::pow(x, 2) + std::pow(y, 2)}};
-    };
-
-    Eigen::Matrix3d I;
-    for (auto p : point_list)
-        I += p.m * inertia(p.x, p.y, p.z);
-
-    return I;
 }
 
 double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)

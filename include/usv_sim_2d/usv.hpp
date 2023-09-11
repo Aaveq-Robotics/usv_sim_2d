@@ -38,6 +38,7 @@ protected:
     Eigen::Matrix3d inertia_matrix_;
 
     // Member functions
+    Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);
     double micros();
     double update_timestamp();
 

@@ -3,6 +3,8 @@
 DiffDrive::DiffDrive()
 {
     point_list_.push_back({10.0, 100.0, 0.0, 0.0}); // {m, x, y, z}
+
+    point_list_ = recompute_relative_to_origin(point_list_);
     inertia_matrix_ = inertia_matrix(point_list_);
 }
 

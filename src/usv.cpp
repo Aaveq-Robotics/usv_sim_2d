@@ -45,6 +45,37 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
+std::vector<USV::PointMass> USV::recompute_relative_to_origin(std::vector<USV::PointMass> points)
+{
+    /* Ensures that the position is equal to the origin / center of mass */
+
+    std::vector<USV::PointMass> points_recomputed;
+    points_recomputed = points;
+
+    // Compute center of mass
+    PointMass com(0.0, 0.0, 0.0, 0.0);
+    for (auto p : points_recomputed)
+    {
+        com.m += p.m;
+        com.x += p.m * p.x;
+        com.y += p.m * p.y;
+        com.z += p.m * p.z;
+    }
+    com.x /= com.m;
+    com.y /= com.m;
+    com.z /= com.m;
+
+    // Recompute coordinates of points relative to com (origin)
+    for (size_t i = 0; i < points_recomputed.size(); i++)
+    {
+        points_recomputed[i].x -= com.x;
+        points_recomputed[i].y -= com.y;
+        points_recomputed[i].z -= com.z;
+    }
+
+    return points_recomputed;
+}
+
 Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
 {
     auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d

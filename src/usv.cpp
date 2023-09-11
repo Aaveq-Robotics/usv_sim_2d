@@ -71,6 +71,13 @@ Eigen::Matrix3d USV::rotation_matrix_eb(double phi, double theta, double psi)
     return Rz * Ry * Rx;
 }
 
+Eigen::Matrix3d transformation_matrix(double phi, double theta)
+{
+    return Eigen::Matrix3d{{1, sin(phi) * (sin(theta) / cos(theta)), cos(phi) * (sin(theta) / cos(theta))},
+                           {0, cos(phi), -sin(phi)},
+                           {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
+}
+
 double USV::micros()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();

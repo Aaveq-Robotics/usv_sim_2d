@@ -26,7 +26,7 @@ public:
         double z;
     };
 
-    std::vector<PointMass> point_list;
+    std::vector<PointMass> point_list_;
 
     USV();
     ~USV() {}
@@ -34,10 +34,12 @@ public:
     bool update(std::array<uint16_t, 16> servo_out);
 
 protected:
+    // Member variables
+    Eigen::Matrix3d inertia_matrix_;
+
+    // Member functions
     double micros();
     double update_timestamp();
-
-    Eigen::Matrix3d inertia_matrix();
 
 private:
     double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);

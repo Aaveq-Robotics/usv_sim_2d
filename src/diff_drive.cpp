@@ -2,7 +2,7 @@
 
 DiffDrive::DiffDrive()
 {
-    point_list.push_back({1.0, 0.0, 0.0, 0.0}); // {m, x, y, z}
+    point_list_.push_back({10.0, 100.0, 0.0, 0.0}); // {m, x, y, z}
 }
 
 bool DiffDrive::update(std::array<uint16_t, 16> servo_out)

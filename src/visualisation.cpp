@@ -28,7 +28,7 @@ void Visualisation::update(DiffDrive &vehice)
     // Draw points
     window_.clear(sf::Color{180, 220, 240});
 
-    for (DiffDrive::PointMass point : vehice.point_list)
+    for (DiffDrive::PointMass point : vehice.point_list_)
     {
         sf::CircleShape shape(5.f);
         shape.setFillColor(sf::Color(255, 50, 50));

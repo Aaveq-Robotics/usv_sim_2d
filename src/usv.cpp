@@ -106,6 +106,14 @@ Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
     return I;
 }
 
+Eigen::Matrix<double, 6, 6> USV::M_rb(double mass, Eigen::Matrix3d inertia_matrix)
+{
+    Eigen::Matrix<double, 6, 6> M_rb;
+    M_rb << mass * Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), inertia_matrix;
+
+    return M_rb;
+}
+
 Eigen::Matrix3d USV::rotation_matrix_eb(Eigen::Vector3d attitude)
 {
     double phi = attitude.x();
@@ -128,6 +136,15 @@ Eigen::Matrix3d USV::transformation_matrix(Eigen::Vector3d attitude)
     return Eigen::Matrix3d{{1, sin(phi) * (sin(theta) / cos(theta)), cos(phi) * (sin(theta) / cos(theta))},
                            {0, cos(phi), -sin(phi)},
                            {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
+}
+
+Eigen::Matrix<double, 6, 6> USV::C_rb(double mass, Eigen::Matrix3d inertia_matrix, Eigen::Vector<double, 6> nu)
+{
+    Eigen::Matrix<double, 6, 6> C_rb;
+    Eigen::Vector<double, 3> omega = nu.tail(3); // Get last 3 elements
+    C_rb << mass * skew_symmetric_matrix(omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), -skew_symmetric_matrix(inertia_matrix * omega);
+
+    return C_rb;
 }
 
 double USV::micros()

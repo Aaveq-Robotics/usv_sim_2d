@@ -49,6 +49,7 @@ protected:
     Eigen::Matrix<double, 6, 6> M_rb(double mass, Eigen::Matrix3d inertia_matrix);
     Eigen::Matrix3d rotation_matrix_eb(Eigen::Vector3d attitude);
     Eigen::Matrix3d transformation_matrix(Eigen::Vector3d attitude);
+    Eigen::Matrix<double, 6, 6> C_rb(double mass, Eigen::Matrix3d inertia_matrix, Eigen::Vector<double, 6> nu);
 
     double micros();
     double update_timestamp();

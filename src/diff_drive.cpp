@@ -9,6 +9,7 @@ DiffDrive::DiffDrive()
     mass_ = sum_mass(point_list_body_);
     point_list_body_ = recompute_relative_to_origin(point_list_body_);
     inertia_matrix_ = inertia_matrix(point_list_body_);
+    M_rb_ = M_rb(mass_, inertia_matrix_);
 }
 
 bool DiffDrive::update(std::array<uint16_t, 16> servo_out)

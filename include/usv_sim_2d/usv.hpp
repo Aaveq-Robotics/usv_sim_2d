@@ -41,6 +41,7 @@ protected:
 
     // Member functions
     double sum_mass(std::vector<PointMass> points);
+    Eigen::Matrix3d skew_symmetric_matrix(Eigen::Vector3d v);
 
     std::vector<PointMass> recompute_relative_to_origin(std::vector<PointMass> points);
     Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);

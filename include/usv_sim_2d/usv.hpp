@@ -16,7 +16,7 @@ public:
         Eigen::Vector3d position;
         Eigen::Vector3d attitude;
         Eigen::Vector3d velocity;
-    } state, state_old;
+    } state;
 
     struct PointMass
     {

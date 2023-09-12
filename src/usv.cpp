@@ -5,12 +5,12 @@
 USV::USV()
 {
     // Init state
-    state_old.timestamp = USV::micros();
-    state_old.gyro = {0.0, 0.0, 0.0};
-    state_old.accel = {0.0, 0.0, 0.0};
-    state_old.position = {0.0, 0.0, 0.0};
-    state_old.attitude = {0.0, 0.0, 0.0};
-    state_old.velocity = {0.0, 0.0, 0.0};
+    state.timestamp = USV::get_time();
+    state.gyro = {0.0, 0.0, 0.0};
+    state.accel = {0.0, 0.0, 0.0};
+    state.position = {0.0, 0.0, 0.0};
+    state.attitude = {0.0, 0.0, 0.0};
+    state.velocity = {0.0, 0.0, 0.0};
 }
 
 Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)

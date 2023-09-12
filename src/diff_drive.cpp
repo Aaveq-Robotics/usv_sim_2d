@@ -35,7 +35,7 @@ bool DiffDrive::update(std::array<uint16_t, 16> servo_out)
     for (auto p : point_list_body_)
     {
         Eigen::Vector3d p_body{p.x, p.y, p.z};
-        Eigen::Vector3d p_earth = rotation_matrix_eb(state.attitude) * (state.position + p_body);
+        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
         point_list_earth_.push_back(p_earth);
     }
 

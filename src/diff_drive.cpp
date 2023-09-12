@@ -6,6 +6,7 @@ DiffDrive::DiffDrive()
     point_list_body_.push_back({15.0, 0.0, 25.0, 0.0});
     point_list_body_.push_back({15.0, 0.0, -25.0, 0.0});
 
+    mass_ = sum_mass(point_list_body_);
     point_list_body_ = recompute_relative_to_origin(point_list_body_);
     inertia_matrix_ = inertia_matrix(point_list_body_);
 }

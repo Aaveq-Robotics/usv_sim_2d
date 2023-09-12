@@ -28,6 +28,7 @@ public:
 
     std::vector<PointMass> point_list_body_;
     std::vector<Eigen::Vector3d> point_list_earth_;
+    double mass_;
 
     USV();
     ~USV() {}
@@ -39,6 +40,8 @@ protected:
     Eigen::Matrix3d inertia_matrix_;
 
     // Member functions
+    double sum_mass(std::vector<PointMass> points);
+
     std::vector<PointMass> recompute_relative_to_origin(std::vector<PointMass> points);
     Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);
     Eigen::Matrix3d rotation_matrix_eb(Eigen::Vector3d attitude);

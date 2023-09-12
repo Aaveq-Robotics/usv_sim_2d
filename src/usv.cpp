@@ -45,6 +45,20 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
+double USV::sum_mass(std::vector<USV::PointMass> points)
+{
+    double sum = 0.0;
+    for (auto p : points)
+        sum += p.m;
+
+    return sum;
+}
+
+Eigen::Matrix3d USV::skew_symmetric_matrix(Eigen::Vector3d v)
+{
+    return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
+}
+
 std::vector<USV::PointMass> USV::recompute_relative_to_origin(std::vector<USV::PointMass> points)
 {
     /* Ensures that the position is equal to the origin / center of mass */

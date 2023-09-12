@@ -53,6 +53,7 @@ protected:
     Eigen::Matrix<double, 6, 6> coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu);
     Eigen::Matrix3d rotation_matrix_eb(const Eigen::Vector3d &attitude);
     Eigen::Matrix3d transformation_matrix(const Eigen::Vector3d &attitude);
+    Eigen::Matrix<double, 6, 6> J_Theta(const Eigen::Vector<double, 6> &eta);
 
 private:
     double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);

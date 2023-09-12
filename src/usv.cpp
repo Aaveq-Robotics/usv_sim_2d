@@ -79,6 +79,11 @@ double USV::update_timestamp()
     return timestep;
 }
 
+void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_condition)
+{
+    eta_ = initial_condition;
+}
+
 double USV::sum_mass(const std::vector<USV::PointMass> &points)
 {
     double sum = 0.0;
@@ -181,8 +186,13 @@ Eigen::Matrix3d USV::transformation_matrix(const Eigen::Vector3d &attitude)
                            {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
 }
 
+Eigen::Matrix<double, 6, 6> USV::J_Theta(const Eigen::Vector<double, 6> &eta)
 {
+    Eigen::Vector<double, 3> Omega = eta.tail(3); // Get last 3 elements
+    Eigen::Matrix<double, 6, 6> J_Theta;
+    J_Theta << rotation_matrix_eb(Omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), transformation_matrix(Omega);
 
+    return J_Theta;
 }
 
 double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)

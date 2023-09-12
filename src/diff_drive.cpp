@@ -21,7 +21,7 @@ bool DiffDrive::update(std::array<uint16_t, 16> servo_out)
         return false;
 
     // Rotation
-    double max_angle_vel = 0.5;
+    double max_angle_vel = 1.0;
     double angle_vel = max_angle_vel * timestep;
     state.attitude = state_old.attitude + Eigen::Vector3d{0.0, 0.0, angle_vel};
 

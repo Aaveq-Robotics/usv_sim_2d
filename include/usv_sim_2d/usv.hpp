@@ -45,7 +45,7 @@ protected:
     Eigen::Matrix3d skew_symmetric_matrix(Eigen::Vector3d v);
 
     std::vector<PointMass> recompute_relative_to_origin(std::vector<PointMass> points);
-    Eigen::Matrix3d inertia_matrix(std::vector<USV::PointMass> points);
+    Eigen::Matrix3d inertia_matrix(std::vector<PointMass> points);
     Eigen::Matrix<double, 6, 6> M_rb(double mass, Eigen::Matrix3d inertia_matrix);
     Eigen::Matrix3d rotation_matrix_eb(Eigen::Vector3d attitude);
     Eigen::Matrix3d transformation_matrix(Eigen::Vector3d attitude);

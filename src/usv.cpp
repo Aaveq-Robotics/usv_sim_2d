@@ -13,33 +13,40 @@ USV::USV()
     state_old.velocity = {0.0, 0.0, 0.0};
 }
 
-bool USV::update(std::array<uint16_t, 16> servo_out)
 {
-    // ideal vehicle model
-    /* servos are defined as
-        1. throttle (really just velocity control)
-        2. steering (really just turn rate omega)
-     */
 
+bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
+{
     // Update time
     double timestep = update_timestamp();
     if (timestep < 0.0)
         return false;
 
-    // how fast is the rover moving
-    double max_velocity = 1.0; // m/s
-    double body_v = interval_map(servo_out[2], 1100.0, 1900.0, -max_velocity, max_velocity);
+    // Rigid body dynamics
+    Eigen::Vector<double, 6> nu_dot = mass_matrix_.inverse() * tau - mass_matrix_.inverse() * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
+    nu_dot *= timestep;
+    nu_ += nu_dot;
 
-    // update the state
-    state.velocity[0] = body_v;
-    state.accel[0] = (state.velocity[0] - state_old.velocity[0]) / timestep; // derivative for accel
-    double delta_pos_x = (state.velocity[0]) * timestep;                     // integrate for position change
-    state.position[0] = delta_pos_x + state_old.position[0];                 // plus c
+    // Body-fixed frame to earth-fixed frame
+    Eigen::Vector<double, 6> eta_dot = J_Theta(eta_) * nu_;
+    eta_dot *= timestep;
+    eta_ += eta_dot;
 
-    state.accel[2] = -9.82; // Gravity
+    // Pass values
+    state.gyro = nu_.tail(3);
+    state.accel = nu_dot.head(3);
+    state.position = eta_.head(3);
+    state.attitude = eta_.tail(3);
+    state.velocity = eta_dot.head(3);
 
-    // step the sim forward
-    state_old = state;
+    // Body to Earth
+    point_list_earth_.clear();
+    for (auto p : point_list_body_)
+    {
+        Eigen::Vector3d p_body{p.x, p.y, p.z};
+        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        point_list_earth_.push_back(p_earth);
+    }
 
     // update successful
     return true;

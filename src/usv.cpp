@@ -13,7 +13,10 @@ USV::USV()
     state_old.velocity = {0.0, 0.0, 0.0};
 }
 
+Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)
 {
+    return Eigen::Vector<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+}
 
 bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
 {

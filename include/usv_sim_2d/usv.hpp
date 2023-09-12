@@ -33,10 +33,14 @@ public:
     USV();
     ~USV() {}
 
-    bool update(std::array<uint16_t, 16> servo_out);
+    Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
+    bool rigid_body_dynamics(const Eigen::Vector<double, 6> &tau);
 
 protected:
     // Member variables
+    Eigen::Vector<double, 6> nu_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    Eigen::Vector<double, 6> eta_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
     Eigen::Matrix3d inertia_matrix_;
     Eigen::Matrix<double, 6, 6> mass_matrix_;
 

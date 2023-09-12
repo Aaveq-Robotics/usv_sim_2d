@@ -8,7 +8,7 @@ public:
     DiffDrive();
     ~DiffDrive() {}
 
-    bool update(std::array<uint16_t, 16> servo_out);
+    Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
 
 private:
 };

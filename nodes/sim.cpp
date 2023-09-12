@@ -57,6 +57,8 @@ private:
     void callback_timer_sim()
     {
         // Calculate USV physics
+        Eigen::Vector<double, 6> tau = usv_.compute_forces(servo_out_);
+
         if (!usv_.rigid_body_dynamics(tau))
         {
             RCLCPP_WARN_STREAM(get_logger(), "Physics update has caused an exit");

@@ -12,5 +12,7 @@ DiffDrive::DiffDrive()
     mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
 }
 
+Eigen::Vector<double, 6> DiffDrive::compute_forces(const std::array<uint16_t, 16> &servo_out)
 {
+    return Eigen::Vector<double, 6>{1000.0, 0.0, 0.0, 0.0, 0.0, 10000.0};
 }

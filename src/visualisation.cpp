@@ -33,7 +33,7 @@ void Visualisation::update(DiffDrive &vehice)
     {
         sf::CircleShape shape(5.f);
         shape.setFillColor(sf::Color(255, 50, 50));
-        shape.setPosition(origin_offset.x + point.x() + vehice.state.position.x(), origin_offset.y - point.y() - vehice.state.position.y()); // y-axis is flipped
+        shape.setPosition(origin_offset.x + point.x(), origin_offset.y - point.y()); // y-axis is flipped
         window_.draw(shape);
     }
 

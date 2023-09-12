@@ -38,21 +38,21 @@ public:
 protected:
     // Member variables
     Eigen::Matrix3d inertia_matrix_;
-    Eigen::Matrix<double, 6, 6> M_rb_;
+    Eigen::Matrix<double, 6, 6> mass_matrix_;
 
     // Member functions
-    double sum_mass(std::vector<PointMass> points);
-    Eigen::Matrix3d skew_symmetric_matrix(Eigen::Vector3d v);
-
-    std::vector<PointMass> recompute_relative_to_origin(std::vector<PointMass> points);
-    Eigen::Matrix3d inertia_matrix(std::vector<PointMass> points);
-    Eigen::Matrix<double, 6, 6> M_rb(double mass, Eigen::Matrix3d inertia_matrix);
-    Eigen::Matrix3d rotation_matrix_eb(Eigen::Vector3d attitude);
-    Eigen::Matrix3d transformation_matrix(Eigen::Vector3d attitude);
-    Eigen::Matrix<double, 6, 6> C_rb(double mass, Eigen::Matrix3d inertia_matrix, Eigen::Vector<double, 6> nu);
-
-    double micros();
+    double get_time();
     double update_timestamp();
+    void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);
+    double sum_mass(const std::vector<PointMass> &points);
+    Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);
+
+    std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points);
+    Eigen::Matrix3d inertia_matrix(const std::vector<PointMass> &points);
+    Eigen::Matrix<double, 6, 6> mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix);
+    Eigen::Matrix<double, 6, 6> coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu);
+    Eigen::Matrix3d rotation_matrix_eb(const Eigen::Vector3d &attitude);
+    Eigen::Matrix3d transformation_matrix(const Eigen::Vector3d &attitude);
 
 private:
     double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);

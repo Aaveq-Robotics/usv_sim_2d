@@ -45,7 +45,41 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
-double USV::sum_mass(std::vector<USV::PointMass> points)
+double USV::get_time()
+{
+    uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    return (double)us / 1000000.0; // Convert to seconds
+}
+
+double USV::update_timestamp()
+{
+    double timestamp_old = state.timestamp;
+    state.timestamp = USV::get_time();
+    double timestep = state.timestamp - timestamp_old;
+
+    if (timestep < 0.0)
+    {
+        // the sim is trying to go backwards in time
+        std::cout << "[USV] Error: Time went backwards" << std::endl;
+        return 0.0;
+    }
+    else if (timestep == 0.0)
+    {
+        // time did not advance. no physics step
+        std::cout << "[USV] Warning: Time did not step forward" << std::endl;
+        return 0.0;
+    }
+    else if (timestep > 60)
+    {
+        // limiting timestep to less than 1 minute
+        std::cout << "[USV] Warning: Time step was very large" << std::endl;
+        return 0.0;
+    }
+
+    return timestep;
+}
+
+double USV::sum_mass(const std::vector<USV::PointMass> &points)
 {
     double sum = 0.0;
     for (auto p : points)
@@ -54,12 +88,12 @@ double USV::sum_mass(std::vector<USV::PointMass> points)
     return sum;
 }
 
-Eigen::Matrix3d USV::skew_symmetric_matrix(Eigen::Vector3d v)
+Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
 {
     return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
 }
 
-std::vector<USV::PointMass> USV::recompute_relative_to_origin(std::vector<USV::PointMass> points)
+std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points)
 {
     /* Ensures that the position is equal to the origin / center of mass */
 
@@ -90,7 +124,7 @@ std::vector<USV::PointMass> USV::recompute_relative_to_origin(std::vector<USV::P
     return points_recomputed;
 }
 
-Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
+Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)
 {
     auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
     {
@@ -106,15 +140,24 @@ Eigen::Matrix3d USV::inertia_matrix(std::vector<USV::PointMass> points)
     return I;
 }
 
-Eigen::Matrix<double, 6, 6> USV::M_rb(double mass, Eigen::Matrix3d inertia_matrix)
+Eigen::Matrix<double, 6, 6> USV::mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix)
 {
-    Eigen::Matrix<double, 6, 6> M_rb;
-    M_rb << mass * Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), inertia_matrix;
+    Eigen::Matrix<double, 6, 6> mass_matrix;
+    mass_matrix << mass * Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), inertia_matrix;
 
-    return M_rb;
+    return mass_matrix;
 }
 
-Eigen::Matrix3d USV::rotation_matrix_eb(Eigen::Vector3d attitude)
+Eigen::Matrix<double, 6, 6> USV::coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu)
+{
+    Eigen::Vector<double, 3> omega = nu.tail(3); // Get last 3 elements
+    Eigen::Matrix<double, 6, 6> coriolis_matrix;
+    coriolis_matrix << mass * skew_symmetric_matrix(omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), -skew_symmetric_matrix(inertia_matrix * omega);
+
+    return coriolis_matrix;
+}
+
+Eigen::Matrix3d USV::rotation_matrix_eb(const Eigen::Vector3d &attitude)
 {
     double phi = attitude.x();
     double theta = attitude.y();
@@ -128,7 +171,7 @@ Eigen::Matrix3d USV::rotation_matrix_eb(Eigen::Vector3d attitude)
     return Rz * Ry * Rx;
 }
 
-Eigen::Matrix3d USV::transformation_matrix(Eigen::Vector3d attitude)
+Eigen::Matrix3d USV::transformation_matrix(const Eigen::Vector3d &attitude)
 {
     double phi = attitude.x();
     double theta = attitude.y();
@@ -138,46 +181,8 @@ Eigen::Matrix3d USV::transformation_matrix(Eigen::Vector3d attitude)
                            {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
 }
 
-Eigen::Matrix<double, 6, 6> USV::C_rb(double mass, Eigen::Matrix3d inertia_matrix, Eigen::Vector<double, 6> nu)
 {
-    Eigen::Matrix<double, 6, 6> C_rb;
-    Eigen::Vector<double, 3> omega = nu.tail(3); // Get last 3 elements
-    C_rb << mass * skew_symmetric_matrix(omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), -skew_symmetric_matrix(inertia_matrix * omega);
 
-    return C_rb;
-}
-
-double USV::micros()
-{
-    uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    return (double)us / 1000000.0; // Convert to seconds
-}
-
-double USV::update_timestamp()
-{
-    state.timestamp = USV::micros();
-    double timestep = state.timestamp - state_old.timestamp;
-
-    if (timestep < 0.0)
-    {
-        // the sim is trying to go backwards in time
-        std::cout << "[USV] Error: Time went backwards" << std::endl;
-        return 0.0;
-    }
-    else if (timestep == 0.0)
-    {
-        // time did not advance. no physics step
-        std::cout << "[USV] Warning: Time did not step forward" << std::endl;
-        return 0.0;
-    }
-    else if (timestep > 60)
-    {
-        // limiting timestep to less than 1 minute
-        std::cout << "[USV] Warning: Time step was very large" << std::endl;
-        return 0.0;
-    }
-
-    return timestep;
 }
 
 double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)

@@ -4,7 +4,7 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 
 ## Requirements
 Tested with:
-- Ubuntu 22.04
+- Ubuntu 22.04 (Jammy Jellyfish)
 - ROS 2 (Humble Hawksbill)
 
 ---

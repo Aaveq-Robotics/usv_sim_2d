@@ -22,4 +22,6 @@ public:
 
 private:
     double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
+
+    Eigen::Vector<double, 6> force_propulsion(const int &servo_left, const int &servo_right);
 };

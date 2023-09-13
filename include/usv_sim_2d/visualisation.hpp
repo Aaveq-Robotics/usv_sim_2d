@@ -14,7 +14,9 @@ public:
 
 private:
     sf::RenderWindow window_;
-    sf::Vector2f origin_offset;
+    sf::Vector2f origin_offset_;
+
+    const int zoom_ = 100;
 
     void draw_grid(int rows, int cols);
 };

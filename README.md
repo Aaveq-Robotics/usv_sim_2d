@@ -34,11 +34,16 @@ Tested with:
 
 ---
 
-This package depends on [SFML](https://www.sfml-dev.org/index.php) and [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page). You need to install SFML from apt:
+Package dependencies are handled with [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html). In the workspace, run:
 
 ```
-sudo apt update
-sudo apt install libsfml-dev
+rosdep install --from-paths src -y --ignore-src
+```
+
+**NOTE:** if this is the first time using rosdep, it must first be initialized via:
+```
+sudo rosdep init
+rosdep update
 ```
 
 There is also a dependency to our own [aaveq_ros_interfaces](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces) package, which needs to be cloned to `src/` as well:

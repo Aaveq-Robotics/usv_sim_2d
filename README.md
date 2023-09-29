@@ -2,47 +2,71 @@
 
 Simlation of the rigid body dynamics of a simple differential drive USV in 2D, in ROS 2 (Humble).
 
-## Requirements
+<!-- vscode-markdown-toc -->
+* 1. [Cloning](#Cloning)
+* 2. [Requirements](#Requirements)
+* 3. [Build](#Build)
+* 4. [Content](#Content)
+	* 4.1. [Node: sim](#Node:sim)
+		* 4.1.1. [Topics](#Topics)
+* 5. [Usage](#Usage)
+
+<!-- vscode-markdown-toc-config
+	numbering=true
+	autoSave=true
+	/vscode-markdown-toc-config -->
+<!-- /vscode-markdown-toc -->
+
+
+##  1. <a name='Cloning'></a>Cloning
+
+Clone this package to a ROS 2 workspace:
+```
+cd ~/ros_ws/src/
+git clone git@github.com:Aaveq-Robotics/usv_sim_2d.git
+cd ~/ros_ws/
+```
+
+##  2. <a name='Requirements'></a>Requirements
 Tested with:
 - Ubuntu 22.04 (Jammy Jellyfish)
 - ROS 2 (Humble Hawksbill)
 
 ---
 
-This package uses [SFML](https://www.sfml-dev.org/index.php) and [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page), which are build alongside this package using CMake's FetchContent.
-SFML depends on system packages which have to be installed before building this package:
+Package dependencies are handled with [rosdep](https://docs.ros.org/en/foxy/Tutorials/Intermediate/Rosdep.html). In the workspace, run:
 
 ```
-sudo apt update
-sudo apt install \
-    libxrandr-dev \
-    libxcursor-dev \
-    libudev-dev \
-    libopenal-dev \
-    libflac-dev \
-    libvorbis-dev \
-    libgl1-mesa-dev \
-    libegl1-mesa-dev \
-    libdrm-dev \
-    libgbm-dev
+rosdep install --from-paths src -y --ignore-src
 ```
 
-## Build
+**NOTE:** if this is the first time using rosdep, it must first be initialized via:
+```
+sudo rosdep init
+rosdep update
+```
 
-Clone this package to a ROS 2 workspace and build with colcon:
+There is also a dependency to our own [aaveq_ros_interfaces](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces) package, which needs to be cloned to `src/` as well:
 ```
 cd ~/ros_ws/src/
-git clone git@github.com:Aaveq-Robotics/usv_sim_2d.git
+git clone git@github.com:Aaveq-Robotics/aaveq_ros_interfaces.git
+cd ~/ros_ws/
+```
+
+##  3. <a name='Build'></a>Build
+
+Build with colcon:
+```
 cd ~/ros_ws/
 source /opt/ros/humble/setup.bash
 colcon build
 ```
 
-## Content
+##  4. <a name='Content'></a>Content
 
-### Node: sim
+###  4.1. <a name='Node:sim'></a>Node: sim
 
-#### Topics
+####  4.1.1. <a name='Topics'></a>Topics
 
 | Name      |Type   | I/O   |
 | ---       | ---   | ---   |
@@ -50,7 +74,7 @@ colcon build
 | sim_state | [`aaveq_ros_interfaces::msg::SimState`](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces/blob/main/msg/SimState.msg) | Publisher |
 
 
-## Usage
+##  5. <a name='Usage'></a>Usage
 
 Run the node after sourcing the workspace:
 ```

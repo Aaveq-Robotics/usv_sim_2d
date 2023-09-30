@@ -30,19 +30,21 @@ public:
         double z;
     };
 
-    std::vector<PointMass> point_list_body_;
-    std::vector<Eigen::Vector3d> point_list_earth_;
-    Eigen::Vector3d origin_;
-    double mass_;
-
     USV();
     ~USV() {}
 
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
     bool rigid_body_dynamics(const Eigen::Vector<double, 6> &tau);
 
+    std::vector<Eigen::Vector3d> get_point_list_earth() { return point_list_earth_; };
+
 protected:
     // Member variables
+    std::vector<PointMass> point_list_body_;
+    std::vector<Eigen::Vector3d> point_list_earth_;
+    Eigen::Vector3d origin_;
+    double mass_;
+
     Eigen::Vector<double, 6> nu_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     Eigen::Vector<double, 6> eta_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 

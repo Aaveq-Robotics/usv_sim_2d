@@ -36,7 +36,7 @@ void Visualisation::update(DiffDrive &vehice)
     window_.draw(shape);
 
     // Points
-    for (Eigen::Vector3d point : vehice.point_list_earth_)
+    for (Eigen::Vector3d point : vehice.get_point_list_earth())
     {
         shape.setFillColor(sf::Color(255, 50, 50));
         shape.setPosition(origin_offset_.x + zoom_ * point.x(), origin_offset_.y - zoom_ * point.y()); // y-axis is flipped

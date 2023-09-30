@@ -32,6 +32,7 @@ public:
 
     std::vector<PointMass> point_list_body_;
     std::vector<Eigen::Vector3d> point_list_earth_;
+    Eigen::Vector3d origin_;
     double mass_;
 
     USV();
@@ -52,10 +53,12 @@ protected:
     double get_time();
     double update_timestamp();
     void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);
-    double sum_mass(const std::vector<PointMass> &points);
+    double compute_mass(const std::vector<PointMass> &points);
+    Eigen::Vector3d compute_com(const std::vector<PointMass> &points, const double &mass);
+    PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
+    std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
     Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);
 
-    std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points);
     Eigen::Matrix3d inertia_matrix(const std::vector<PointMass> &points);
     Eigen::Matrix<double, 6, 6> mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix);
     Eigen::Matrix<double, 6, 6> coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu);

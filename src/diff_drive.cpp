@@ -20,8 +20,9 @@ void DiffDrive::load_vessel_config(std::string vessel_config_path)
     for (auto point : vessel_config["points_of_mass"])
         point_list_body_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
 
-    mass_ = sum_mass(point_list_body_);
-    point_list_body_ = recompute_relative_to_origin(point_list_body_);
+    mass_ = compute_mass(point_list_body_);
+    origin_ = compute_com(point_list_body_, mass_);
+    point_list_body_ = recompute_relative_to_origin(point_list_body_, origin_); // Ensures that the USV position is equal to the origin
     inertia_matrix_ = inertia_matrix(point_list_body_);
     mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
 }

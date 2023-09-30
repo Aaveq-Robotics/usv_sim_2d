@@ -94,7 +94,7 @@ void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_conditio
     eta_ = initial_condition;
 }
 
-double USV::sum_mass(const std::vector<USV::PointMass> &points)
+double USV::compute_mass(const std::vector<USV::PointMass> &points)
 {
     double sum = 0.0;
     for (auto p : points)
@@ -102,41 +102,54 @@ double USV::sum_mass(const std::vector<USV::PointMass> &points)
 
     return sum;
 }
+Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, const double &mass)
+{
+    // Compute center of mass
+    Eigen::Vector3d com{0.0, 0.0, 0.0};
+    for (auto p : points)
+    {
+        com[0] += p.m * p.x;
+        com[1] += p.m * p.y;
+        com[2] += p.m * p.z;
+    }
+
+    com[0] /= mass;
+    com[1] /= mass;
+    com[2] /= mass;
+
+    return com;
+}
+
+USV::PointMass USV::recompute_relative_to_origin(const USV::PointMass &point, const Eigen::Vector3d &com)
+{
+    USV::PointMass point_recomputed = point;
+
+    // Recompute coordinates of points relative to com (origin)
+    point_recomputed.x -= com.x();
+    point_recomputed.y -= com.y();
+    point_recomputed.z -= com.z();
+
+    return point_recomputed;
+}
+
+std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points, const Eigen::Vector3d &com)
+{
+    std::vector<USV::PointMass> points_recomputed = points;
+
+    // Recompute coordinates of points relative to com (origin)
+    size_t i = 0;
+    for (auto point : points_recomputed)
+    {
+        points_recomputed[i] = recompute_relative_to_origin(point, com);
+        i++;
+    }
+
+    return points_recomputed;
+}
 
 Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
 {
     return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
-}
-
-std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points)
-{
-    /* Ensures that the position is equal to the origin / center of mass */
-
-    std::vector<USV::PointMass> points_recomputed;
-    points_recomputed = points;
-
-    // Compute center of mass
-    PointMass com(0.0, 0.0, 0.0, 0.0);
-    for (auto p : points_recomputed)
-    {
-        com.m += p.m;
-        com.x += p.m * p.x;
-        com.y += p.m * p.y;
-        com.z += p.m * p.z;
-    }
-    com.x /= com.m;
-    com.y /= com.m;
-    com.z /= com.m;
-
-    // Recompute coordinates of points relative to com (origin)
-    for (size_t i = 0; i < points_recomputed.size(); i++)
-    {
-        points_recomputed[i].x -= com.x;
-        points_recomputed[i].y -= com.y;
-        points_recomputed[i].z -= com.z;
-    }
-
-    return points_recomputed;
 }
 
 Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)

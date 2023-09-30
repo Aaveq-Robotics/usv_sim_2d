@@ -15,6 +15,7 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(SFML COMPONENTS graphics REQUIRED)
+find_package(jsoncpp REQUIRED)
 
 find_package(aaveq_ros_interfaces REQUIRED)
 
@@ -43,7 +44,7 @@ install(
 
 ## diff_drive
 add_library(diff_drive src/diff_drive.cpp)
-target_link_libraries(diff_drive usv Eigen3::Eigen)
+target_link_libraries(diff_drive usv Eigen3::Eigen jsoncpp)
 ament_export_targets(diff_drive HAS_LIBRARY_TARGET)
 
 install(

@@ -1,14 +1,24 @@
 #include <iostream>
+#include <fstream>
+#include <jsoncpp/json/json.h>
 
 #include "usv_sim_2d/diff_drive.hpp"
 
 DiffDrive::DiffDrive()
 {
     set_initial_condition({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+}
 
-    point_list_body_.push_back({0.25, 0.5, 0.0, 0.0}); // {m, x, y, z}
-    point_list_body_.push_back({0.25, 0.0, 0.1, 0.0});
-    point_list_body_.push_back({0.25, 0.0, -0.1, 0.0});
+void DiffDrive::load_vessel_config(std::string vessel_config_path)
+{
+    // Load JSON
+    std::ifstream vessel_config_file(vessel_config_path, std::ifstream::binary);
+    Json::Value vessel_config;
+    vessel_config_file >> vessel_config;
+
+    // Load points of mass
+    for (auto point : vessel_config["points_of_mass"])
+        point_list_body_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
 
     mass_ = sum_mass(point_list_body_);
     point_list_body_ = recompute_relative_to_origin(point_list_body_);

@@ -18,6 +18,8 @@ public:
     DiffDrive();
     ~DiffDrive() {}
 
+    void load_vessel_config(std::string vessel_config_path);
+
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
 
 private:

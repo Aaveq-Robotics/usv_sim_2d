@@ -29,6 +29,9 @@ public:
         /***** Timers *****/
         timer_sim_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / sim_freq_), std::bind(&Sim::callback_timer_sim, this));
         timer_window_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / 60), std::bind(&Sim::callback_timer_window, this));
+
+        /***** Initiate Variables *****/
+        usv_.load_vessel_config(vessel_config_path_);
     }
 
 private:

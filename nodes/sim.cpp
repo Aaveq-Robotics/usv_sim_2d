@@ -18,6 +18,7 @@ public:
     {
         /***** Parameters *****/
         sim_freq_ = this->declare_parameter<double>("sim_freq", 60.0);
+        vessel_config_path_ = this->declare_parameter<std::string>("vessel_config", "");
 
         /***** Subscription *****/
         subscriber_control_output_ = this->create_subscription<aaveq_ros_interfaces::msg::ControlOutput>("control_output", 1, std::bind(&Sim::callback_control_output, this, std::placeholders::_1));
@@ -34,6 +35,7 @@ private:
     /***** Variables *****/
     // Node parameters
     double sim_freq_;
+    std::string vessel_config_path_;
 
     // Node variables
     rclcpp::Subscription<aaveq_ros_interfaces::msg::ControlOutput>::SharedPtr subscriber_control_output_;

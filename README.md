@@ -9,6 +9,7 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 * 4. [Content](#Content)
 	* 4.1. [Node: sim](#Node:sim)
 		* 4.1.1. [Topics](#Topics)
+		* 4.1.2. [Parameters](#Parameters)
 * 5. [Usage](#Usage)
 
 <!-- vscode-markdown-toc-config
@@ -73,11 +74,18 @@ colcon build
 | control_output | [`aaveq_ros_interfaces::msg::ControlOutput`](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces/blob/main/msg/ControlOutput.msg) | Subscriber |
 | sim_state | [`aaveq_ros_interfaces::msg::SimState`](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces/blob/main/msg/SimState.msg) | Publisher |
 
+####  4.1.2. <a name='Parameters'></a>Parameters
+| Name      	| Description   					|Type   	| Default	|
+| ---       	| ---   							| ---   	| ---		|
+| sim_freq 		| Simulation frequency 				| `double` 	| 60.0		|
+| vessel_config | Path to vessel configuration file	| `string` 	| ""		|
+
 
 ##  5. <a name='Usage'></a>Usage
 
-Run the node after sourcing the workspace:
+Run the node after sourcing the workspace, with the vessel_config parameter set:
 ```
-ros2 run usv_sim_2d sim
+ros2 run usv_sim_2d sim --ros-args -p vessel_config:=src/usv_sim_2d/vessel_configs/diff_drive_simple.json
 ```
+
 

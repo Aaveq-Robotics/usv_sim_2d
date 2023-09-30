@@ -28,6 +28,7 @@ install(
   DIRECTORY include/usv_sim_2d
   DESTINATION include)
 
+## usv
 add_library(usv src/usv.cpp)
 target_link_libraries(usv Eigen3::Eigen)
 ament_export_targets(usv HAS_LIBRARY_TARGET)
@@ -40,6 +41,7 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
+## diff_drive
 add_library(diff_drive src/diff_drive.cpp)
 target_link_libraries(diff_drive usv Eigen3::Eigen)
 ament_export_targets(diff_drive HAS_LIBRARY_TARGET)
@@ -52,6 +54,33 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
+## actuator
+add_library(actuator src/actuator.cpp)
+target_link_libraries(actuator Eigen3::Eigen)
+ament_export_targets(actuator HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS actuator
+  EXPORT actuator
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
+
+## propeller
+add_library(propeller src/propeller.cpp)
+target_link_libraries(propeller actuator Eigen3::Eigen)
+ament_export_targets(propeller HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS propeller
+  EXPORT propeller
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
+
+## visualisation
 add_library(visualisation src/visualisation.cpp)
 target_link_libraries(visualisation diff_drive Eigen3::Eigen sfml-graphics)
 ament_export_targets(visualisation HAS_LIBRARY_TARGET)

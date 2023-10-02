@@ -9,7 +9,7 @@ Visualisation::Visualisation()
 }
 
 // Differential Drive Boat
-void Visualisation::update(DiffDrive &vehice)
+void Visualisation::update(USV &vehice)
 {
     // Handle events
     for (auto event = sf::Event{}; window_.pollEvent(event);)

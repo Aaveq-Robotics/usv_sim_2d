@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "usv_sim_2d/diff_drive.hpp"
+#include "usv_sim_2d/usv.hpp"
 
 class Visualisation
 {
@@ -10,7 +10,7 @@ public:
     Visualisation();
     ~Visualisation() {}
 
-    void update(DiffDrive &vehice);
+    void update(USV &vehice);
 
 private:
     sf::RenderWindow window_;

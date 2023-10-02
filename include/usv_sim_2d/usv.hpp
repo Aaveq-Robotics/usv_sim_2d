@@ -4,9 +4,6 @@
 #include <time.h>
 #include <Eigen/Dense>
 
-#define SERVO_MIN 1100
-#define SERVO_TRIM 1500
-#define SERVO_MAX 1900
 #include "usv_sim_2d/actuator.hpp"
 
 class USV

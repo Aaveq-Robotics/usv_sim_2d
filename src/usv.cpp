@@ -119,19 +119,19 @@ double USV::update_timestamp()
 
     if (timestep < 0.0)
     {
-        // the sim is trying to go backwards in time
+        // The sim is trying to go backwards in time
         std::cout << "[USV] Error: Time went backwards" << std::endl;
         return 0.0;
     }
     else if (timestep == 0.0)
     {
-        // time did not advance. no physics step
+        // Time did not advance. no physics step
         std::cout << "[USV] Warning: Time did not step forward" << std::endl;
         return 0.0;
     }
     else if (timestep > 60)
     {
-        // limiting timestep to less than 1 minute
+        // Limiting timestep to less than 1 minute
         std::cout << "[USV] Warning: Time step was very large" << std::endl;
         return 0.0;
     }

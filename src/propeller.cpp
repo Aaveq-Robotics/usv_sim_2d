@@ -18,7 +18,7 @@ Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
     // Ensure servo signals are within range
     if (servo != std::clamp(servo, SERVO_MIN, SERVO_MAX))
     {
-        std::cout << "[Propeller]: servo was out of range" << '\n';
+        std::cout << "[Propeller " << name_ << "]: servo was out of range" << '\n';
         return tau;
     }
 
@@ -31,6 +31,8 @@ Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
 
     // Compute propulsion moments - the position describes the moment arm
     Eigen::Vector3d torque = position_.cross(thrust);
+
+    std::cout << "[Propeller " << name_ << "]: torque: " << torque << '\n';
 
     // Return forces
     tau << thrust, torque;

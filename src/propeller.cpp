@@ -30,7 +30,7 @@ Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
     Eigen::Vector3d thrust = attitude_cartesian_ * k_t_ * std::pow(angular_velocity, 2);
 
     // Compute propulsion moments - the position describes the moment arm
-    Eigen::Vector3d torque = position_.cwiseProduct(thrust); // Elementwise multiplication
+    Eigen::Vector3d torque = position_.cross(thrust);
 
     // Return forces
     tau << thrust, torque;

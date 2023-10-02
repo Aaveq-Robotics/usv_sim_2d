@@ -9,7 +9,7 @@
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
 #include "usv_sim_2d/visualisation.hpp"
-#include "usv_sim_2d/diff_drive.hpp"
+#include "usv_sim_2d/usv.hpp"
 
 class Sim : public rclcpp::Node
 {
@@ -49,7 +49,7 @@ private:
     // Variables
     Visualisation window_;
 
-    DiffDrive usv_;
+    USV usv_;
     std::array<uint16_t, 16> servo_out_;
 
     /***** Callbacks *****/

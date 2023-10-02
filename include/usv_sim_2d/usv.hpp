@@ -40,7 +40,7 @@ public:
 
     std::vector<Eigen::Vector3d> get_point_list_earth() { return point_list_earth_; };
 
-protected:
+private:
     // Member variables
     std::vector<PointMass> point_list_body_;
     std::vector<Eigen::Vector3d> point_list_earth_;

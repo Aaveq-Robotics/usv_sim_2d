@@ -7,6 +7,8 @@
 
 USV::USV()
 {
+    set_initial_condition({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+
     // Init state
     state.timestamp = USV::get_time();
     state.gyro = {0.0, 0.0, 0.0};

@@ -11,10 +11,20 @@ class Actuator
 {
 public:
     Actuator() {}
+    Actuator(Json::Value properties);
     ~Actuator() {}
 
-    Eigen::Vector<double, 6> propulsion();
+    int get_servo_channel() { return servo_channel_; }
+    void set_position(Eigen::Vector3d position) { position_ = position; }
+
+    virtual Eigen::Vector<double, 6> propulsion(const int &servo);
 
 protected:
+    int servo_channel_;
+    std::string name_;
+    std::string type_;
+    Eigen::Vector3d position_;
+    Eigen::Vector3d attitude_cartesian_;
+
     double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
 };

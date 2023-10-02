@@ -2,22 +2,11 @@
 
 #include "usv_sim_2d/propeller.hpp"
 
-Propeller::Propeller(Json::Value properties)
+Propeller::Propeller(Json::Value properties) : Actuator(properties)
 {
-    servo_idx_ = properties["servo_idx"].asInt();
-    position_[0] = properties["position"]["x"].asDouble();
-    position_[1] = properties["position"]["y"].asDouble();
-    position_[2] = properties["position"]["z"].asDouble();
     ang_vel_min_ = properties["ang_vel_min"].asDouble();
     ang_vel_max_ = properties["ang_vel_max"].asDouble();
     k_t_ = properties["k_t"].asDouble();
-
-    // Compute attitude in cartesian coordinates
-    double pitch = properties["attitude"]["pitch"].asDouble();
-    double yaw = properties["attitude"]["yaw"].asDouble();
-    attitude_cartesian_[0] = sin(pitch) * cos(yaw);
-    attitude_cartesian_[1] = sin(pitch) * sin(yaw);
-    attitude_cartesian_[2] = cos(pitch);
 }
 
 Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)

@@ -120,6 +120,18 @@ Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, cons
     return com;
 }
 
+Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com)
+{
+    Eigen::Vector3d point_recomputed = point;
+
+    // Recompute coordinates of points relative to com (origin)
+    point_recomputed.x() -= com.x();
+    point_recomputed.y() -= com.y();
+    point_recomputed.z() -= com.z();
+
+    return point_recomputed;
+}
+
 USV::PointMass USV::recompute_relative_to_origin(const USV::PointMass &point, const Eigen::Vector3d &com)
 {
     USV::PointMass point_recomputed = point;

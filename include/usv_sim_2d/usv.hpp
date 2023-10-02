@@ -57,6 +57,7 @@ protected:
     void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);
     double compute_mass(const std::vector<PointMass> &points);
     Eigen::Vector3d compute_com(const std::vector<PointMass> &points, const double &mass);
+    Eigen::Vector3d recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com);
     PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
     std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
     Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);

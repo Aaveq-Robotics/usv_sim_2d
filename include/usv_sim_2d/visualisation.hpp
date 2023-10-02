@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <SFML/Graphics.hpp>
 
 #include "usv_sim_2d/usv.hpp"
@@ -18,5 +19,6 @@ private:
 
     const int zoom_ = 100;
 
+    sf::Vector2f transform_coord_system(const Eigen::Vector3d &position);
     void draw_grid(int rows, int cols);
 };

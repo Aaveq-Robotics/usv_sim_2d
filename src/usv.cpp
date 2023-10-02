@@ -1,5 +1,8 @@
 #include <iostream>
+#include <fstream>
+#include <jsoncpp/json/json.h>
 
+#include "usv_sim_2d/propeller.hpp"
 #include "usv_sim_2d/usv.hpp"
 
 USV::USV()
@@ -13,9 +16,44 @@ USV::USV()
     state.velocity = {0.0, 0.0, 0.0};
 }
 
+void USV::load_vessel_config(std::string vessel_config_path)
+{
+    // Load JSON
+    std::ifstream vessel_config_file(vessel_config_path, std::ifstream::binary);
+    Json::Value vessel_config;
+    vessel_config_file >> vessel_config;
+
+    // Load points of mass
+    for (auto point : vessel_config["points_of_mass"])
+        point_list_body_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+
+    mass_ = compute_mass(point_list_body_);
+    origin_ = compute_com(point_list_body_, mass_);
+    point_list_body_ = recompute_relative_to_origin(point_list_body_, origin_); // Ensures that the USV position is equal to the origin
+    inertia_matrix_ = inertia_matrix(point_list_body_);
+    mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
+
+    for (auto actuator_config : vessel_config["actuators"])
+    {
+        Eigen::Vector3d position;
+        position[0] = actuator_config["position"]["x"].asDouble();
+        position[1] = actuator_config["position"]["y"].asDouble();
+        position[2] = actuator_config["position"]["z"].asDouble();
+
+        Actuator *actuator = create_actuator(actuator_config);
+        actuator->set_position(recompute_relative_to_origin(position, origin_));
+        actuators_.push_back(actuator);
+    }
+}
+
 Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)
 {
-    return Eigen::Vector<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    Eigen::Vector<double, 6> tau{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    for (auto actuator : actuators_)
+        tau += actuator->propulsion(servo_out[actuator->get_servo_channel()]);
+
+    return tau;
 }
 
 bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
@@ -53,6 +91,16 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
 
     // update successful
     return true;
+}
+
+Actuator *USV::create_actuator(Json::Value actuator_config)
+{
+    std::string type = actuator_config["type"].asString();
+
+    if (type == "propeller")
+        return new Propeller(actuator_config);
+    else
+        return new Actuator;
 }
 
 double USV::get_time()

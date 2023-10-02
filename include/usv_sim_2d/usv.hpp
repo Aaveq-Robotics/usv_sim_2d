@@ -7,6 +7,7 @@
 #define SERVO_MIN 1100
 #define SERVO_TRIM 1500
 #define SERVO_MAX 1900
+#include "usv_sim_2d/actuator.hpp"
 
 class USV
 {
@@ -33,6 +34,7 @@ public:
     USV();
     ~USV() {}
 
+    void load_vessel_config(std::string vessel_config_path);
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
     bool rigid_body_dynamics(const Eigen::Vector<double, 6> &tau);
 
@@ -45,6 +47,8 @@ protected:
     Eigen::Vector3d origin_;
     double mass_;
 
+    std::vector<Actuator *> actuators_;
+
     Eigen::Vector<double, 6> nu_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     Eigen::Vector<double, 6> eta_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
@@ -52,6 +56,8 @@ protected:
     Eigen::Matrix<double, 6, 6> mass_matrix_;
 
     // Member functions
+    Actuator *create_actuator(Json::Value actuator_config);
+
     double get_time();
     double update_timestamp();
     void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);

@@ -9,9 +9,9 @@
         {
             "name": "thurst_left",
             "type": "propeller",
-            "servo_idx": 0,
+            "servo_channel": 0,
             "ang_vel_min": 0.0,
-            "ang_vel_max": 1000,
+            "ang_vel_max": 1000.0,
             "k_t": 0.0000001,
             "position": {
                 "x": 0.0,
@@ -26,9 +26,9 @@
         {
             "name": "thurst_right",
             "type": "propeller",
-            "servo_idx": 2,
+            "servo_channel": 2,
             "ang_vel_min": 0.0,
-            "ang_vel_max": 1000,
+            "ang_vel_max": 1000.0,
             "k_t": 0.0000001,
             "position": {
                 "x": 0.0,

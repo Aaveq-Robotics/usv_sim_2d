@@ -10,6 +10,9 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 	* 4.1. [Node: sim](#Node:sim)
 		* 4.1.1. [Topics](#Topics)
 		* 4.1.2. [Parameters](#Parameters)
+	* 4.2. [Node: servo_test](#Node:servo_test)
+		* 4.2.1. [Topics](#Topics-1)
+		* 4.2.2. [Parameters](#Parameters-1)
 * 5. [Usage](#Usage)
 
 <!-- vscode-markdown-toc-config
@@ -66,7 +69,7 @@ colcon build
 ##  4. <a name='Content'></a>Content
 
 ###  4.1. <a name='Node:sim'></a>Node: sim
-
+This node controls the simulation, creates a window and calls the `USV` class.
 ####  4.1.1. <a name='Topics'></a>Topics
 
 | Name      |Type   | I/O   |
@@ -80,12 +83,32 @@ colcon build
 | sim_freq 		| Simulation frequency 				| `double` 	| 60.0		|
 | vessel_config | Path to vessel configuration file	| `string` 	| ""		|
 
+###  4.2. <a name='Node:servo_test'></a>Node: servo_test
+Node to test functionality of physics in the simulation, without having to control it through ArtuPilot SITL. It sends simple servo commands to channel 0 and 2, going between values of 1500-1900 in a sinusodial pattern.
+
+####  4.2.1. <a name='Topics-1'></a>Topics
+
+| Name      |Type   | I/O   |
+| ---       | ---   | ---   |
+| control_output | [`aaveq_ros_interfaces::msg::ControlOutput`](https://github.com/Aaveq-Robotics/aaveq_ros_interfaces/blob/main/msg/ControlOutput.msg) | Publisher |
+
+
+####  4.2.2. <a name='Parameters-1'></a>Parameters
+| Name  | Description   		|Type   	| Default	|
+| ---   | ---   				| ---   	| ---		|
+| freq	| Publishing frequency 	| `double` 	| 60.0		|
+
+
 
 ##  5. <a name='Usage'></a>Usage
 
-Run the node after sourcing the workspace, with the vessel_config parameter set:
+Run the simulation node after sourcing the workspace, with the vessel_config parameter set:
 ```
 ros2 run usv_sim_2d sim --ros-args -p vessel_config:=src/usv_sim_2d/vessel_configs/diff_drive_simple.json
 ```
 
+For testing, run the servo test node in a seperate terminal:
+```
+ros2 run usv_sim_2d servo_test
+```
 

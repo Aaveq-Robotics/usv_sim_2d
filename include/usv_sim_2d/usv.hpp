@@ -35,12 +35,15 @@ public:
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
     bool rigid_body_dynamics(const Eigen::Vector<double, 6> &tau);
 
-    std::vector<Eigen::Vector3d> get_point_list_earth() { return point_list_earth_; };
+    std::vector<Eigen::Vector3d> get_points_of_mass() { return points_of_mass_earth_; };
+    std::vector<Eigen::Vector3d> get_points_of_hull() { return points_of_hull_earth_; };
 
 private:
     // Member variables
-    std::vector<PointMass> point_list_body_;
-    std::vector<Eigen::Vector3d> point_list_earth_;
+    std::vector<PointMass> points_of_mass_;
+    std::vector<Eigen::Vector3d> points_of_mass_earth_;
+    std::vector<Eigen::Vector3d> points_of_hull_;
+    std::vector<Eigen::Vector3d> points_of_hull_earth_;
     Eigen::Vector3d origin_;
     double mass_;
 

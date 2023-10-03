@@ -27,12 +27,16 @@ void USV::load_vessel_config(std::string vessel_config_path)
 
     // Load points of mass
     for (auto point : vessel_config["points_of_mass"])
-        point_list_body_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+        points_of_mass_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
 
-    mass_ = compute_mass(point_list_body_);
-    origin_ = compute_com(point_list_body_, mass_);
-    point_list_body_ = recompute_relative_to_origin(point_list_body_, origin_); // Ensures that the USV position is equal to the origin
-    inertia_matrix_ = inertia_matrix(point_list_body_);
+    for (auto point : vessel_config["hull_shape"])
+        points_of_hull_.push_back({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+
+    mass_ = compute_mass(points_of_mass_);
+    origin_ = compute_com(points_of_mass_, mass_);
+    points_of_mass_ = recompute_relative_to_origin(points_of_mass_, origin_); // Ensures that the USV position is equal to the origin
+    points_of_hull_ = recompute_relative_to_origin(points_of_hull_, origin_); // Ensures that the USV position is equal to the origin
+    inertia_matrix_ = inertia_matrix(points_of_mass_);
     mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
 
     for (auto actuator_config : vessel_config["actuators"])
@@ -83,12 +87,19 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
     state.velocity = eta_dot.head(3);
 
     // Body to Earth
-    point_list_earth_.clear();
-    for (auto p : point_list_body_)
+    points_of_mass_earth_.clear();
+    for (auto p : points_of_mass_)
     {
         Eigen::Vector3d p_body{p.x, p.y, p.z};
         Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
-        point_list_earth_.push_back(p_earth);
+        points_of_mass_earth_.push_back(p_earth);
+    }
+
+    points_of_hull_earth_.clear();
+    for (auto p_body : points_of_hull_)
+    {
+        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        points_of_hull_earth_.push_back(p_earth);
     }
 
     // update successful

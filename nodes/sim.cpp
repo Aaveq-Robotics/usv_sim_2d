@@ -9,7 +9,7 @@
 #include "aaveq_ros_interfaces/msg/control_output.hpp"
 #include "aaveq_ros_interfaces/msg/sim_state.hpp"
 #include "usv_sim_2d/visualisation.hpp"
-#include "usv_sim_2d/diff_drive.hpp"
+#include "usv_sim_2d/usv.hpp"
 
 class Sim : public rclcpp::Node
 {
@@ -18,6 +18,7 @@ public:
     {
         /***** Parameters *****/
         sim_freq_ = this->declare_parameter<double>("sim_freq", 60.0);
+        vessel_config_path_ = this->declare_parameter<std::string>("vessel_config", "");
 
         /***** Subscription *****/
         subscriber_control_output_ = this->create_subscription<aaveq_ros_interfaces::msg::ControlOutput>("control_output", 1, std::bind(&Sim::callback_control_output, this, std::placeholders::_1));
@@ -28,12 +29,16 @@ public:
         /***** Timers *****/
         timer_sim_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / sim_freq_), std::bind(&Sim::callback_timer_sim, this));
         timer_window_ = this->create_wall_timer(std::chrono::duration<double>(1.0 / 60), std::bind(&Sim::callback_timer_window, this));
+
+        /***** Initiate Variables *****/
+        usv_.load_vessel_config(vessel_config_path_);
     }
 
 private:
     /***** Variables *****/
     // Node parameters
     double sim_freq_;
+    std::string vessel_config_path_;
 
     // Node variables
     rclcpp::Subscription<aaveq_ros_interfaces::msg::ControlOutput>::SharedPtr subscriber_control_output_;
@@ -44,7 +49,7 @@ private:
     // Variables
     Visualisation window_;
 
-    DiffDrive usv_;
+    USV usv_;
     std::array<uint16_t, 16> servo_out_;
 
     /***** Callbacks *****/

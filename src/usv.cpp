@@ -1,9 +1,14 @@
 #include <iostream>
+#include <fstream>
+#include <jsoncpp/json/json.h>
 
+#include "usv_sim_2d/propeller.hpp"
 #include "usv_sim_2d/usv.hpp"
 
 USV::USV()
 {
+    set_initial_condition({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+
     // Init state
     state.timestamp = USV::get_time();
     state.gyro = {0.0, 0.0, 0.0};
@@ -13,9 +18,44 @@ USV::USV()
     state.velocity = {0.0, 0.0, 0.0};
 }
 
+void USV::load_vessel_config(std::string vessel_config_path)
+{
+    // Load JSON
+    std::ifstream vessel_config_file(vessel_config_path, std::ifstream::binary);
+    Json::Value vessel_config;
+    vessel_config_file >> vessel_config;
+
+    // Load points of mass
+    for (auto point : vessel_config["points_of_mass"])
+        point_list_body_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+
+    mass_ = compute_mass(point_list_body_);
+    origin_ = compute_com(point_list_body_, mass_);
+    point_list_body_ = recompute_relative_to_origin(point_list_body_, origin_); // Ensures that the USV position is equal to the origin
+    inertia_matrix_ = inertia_matrix(point_list_body_);
+    mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
+
+    for (auto actuator_config : vessel_config["actuators"])
+    {
+        Eigen::Vector3d position;
+        position[0] = actuator_config["position"]["x"].asDouble();
+        position[1] = actuator_config["position"]["y"].asDouble();
+        position[2] = actuator_config["position"]["z"].asDouble();
+
+        Actuator *actuator = create_actuator(actuator_config);
+        actuator->set_position(recompute_relative_to_origin(position, origin_));
+        actuators_.push_back(actuator);
+    }
+}
+
 Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)
 {
-    return Eigen::Vector<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    Eigen::Vector<double, 6> tau{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    for (auto actuator : actuators_)
+        tau += actuator->propulsion(servo_out[actuator->get_servo_channel()]);
+
+    return tau;
 }
 
 bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
@@ -26,7 +66,7 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
         return false;
 
     // Rigid body dynamics
-    Eigen::Vector<double, 6> nu_dot = mass_matrix_.inverse() * tau - mass_matrix_.inverse() * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
+    Eigen::Vector<double, 6> nu_dot = matrix_inverse(mass_matrix_) * tau - matrix_inverse(mass_matrix_) * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
     nu_dot *= timestep;
     nu_ += nu_dot;
 
@@ -55,6 +95,16 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
     return true;
 }
 
+Actuator *USV::create_actuator(Json::Value actuator_config)
+{
+    std::string type = actuator_config["type"].asString();
+
+    if (type == "propeller")
+        return new Propeller(actuator_config);
+    else
+        return new Actuator;
+}
+
 double USV::get_time()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
@@ -69,19 +119,19 @@ double USV::update_timestamp()
 
     if (timestep < 0.0)
     {
-        // the sim is trying to go backwards in time
+        // The sim is trying to go backwards in time
         std::cout << "[USV] Error: Time went backwards" << std::endl;
         return 0.0;
     }
     else if (timestep == 0.0)
     {
-        // time did not advance. no physics step
+        // Time did not advance. no physics step
         std::cout << "[USV] Warning: Time did not step forward" << std::endl;
         return 0.0;
     }
     else if (timestep > 60)
     {
-        // limiting timestep to less than 1 minute
+        // Limiting timestep to less than 1 minute
         std::cout << "[USV] Warning: Time step was very large" << std::endl;
         return 0.0;
     }
@@ -94,7 +144,7 @@ void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_conditio
     eta_ = initial_condition;
 }
 
-double USV::sum_mass(const std::vector<USV::PointMass> &points)
+double USV::compute_mass(const std::vector<USV::PointMass> &points)
 {
     double sum = 0.0;
     for (auto p : points)
@@ -102,41 +152,76 @@ double USV::sum_mass(const std::vector<USV::PointMass> &points)
 
     return sum;
 }
+Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, const double &mass)
+{
+    // Compute center of mass
+    Eigen::Vector3d com{0.0, 0.0, 0.0};
+    for (auto p : points)
+    {
+        com[0] += p.m * p.x;
+        com[1] += p.m * p.y;
+        com[2] += p.m * p.z;
+    }
+
+    com[0] /= mass;
+    com[1] /= mass;
+    com[2] /= mass;
+
+    return com;
+}
+
+Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com)
+{
+    Eigen::Vector3d point_recomputed = point;
+
+    // Recompute coordinates of points relative to com (origin)
+    point_recomputed.x() -= com.x();
+    point_recomputed.y() -= com.y();
+    point_recomputed.z() -= com.z();
+
+    return point_recomputed;
+}
+
+USV::PointMass USV::recompute_relative_to_origin(const USV::PointMass &point, const Eigen::Vector3d &com)
+{
+    USV::PointMass point_recomputed = point;
+
+    // Recompute coordinates of points relative to com (origin)
+    point_recomputed.x -= com.x();
+    point_recomputed.y -= com.y();
+    point_recomputed.z -= com.z();
+
+    return point_recomputed;
+}
+
+std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points, const Eigen::Vector3d &com)
+{
+    std::vector<USV::PointMass> points_recomputed = points;
+
+    // Recompute coordinates of points relative to com (origin)
+    size_t i = 0;
+    for (auto point : points_recomputed)
+    {
+        points_recomputed[i] = recompute_relative_to_origin(point, com);
+        i++;
+    }
+
+    return points_recomputed;
+}
 
 Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
 {
     return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
 }
 
-std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points)
+Eigen::Matrix<double, 6, 6> USV::matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix)
 {
-    /* Ensures that the position is equal to the origin / center of mass */
+    const float epsilon = 1e-6f; // Small tolerance value
 
-    std::vector<USV::PointMass> points_recomputed;
-    points_recomputed = points;
-
-    // Compute center of mass
-    PointMass com(0.0, 0.0, 0.0, 0.0);
-    for (auto p : points_recomputed)
-    {
-        com.m += p.m;
-        com.x += p.m * p.x;
-        com.y += p.m * p.y;
-        com.z += p.m * p.z;
-    }
-    com.x /= com.m;
-    com.y /= com.m;
-    com.z /= com.m;
-
-    // Recompute coordinates of points relative to com (origin)
-    for (size_t i = 0; i < points_recomputed.size(); i++)
-    {
-        points_recomputed[i].x -= com.x;
-        points_recomputed[i].y -= com.y;
-        points_recomputed[i].z -= com.z;
-    }
-
-    return points_recomputed;
+    if (matrix.determinant() > epsilon)
+        return matrix.inverse();
+    else
+        return matrix.completeOrthogonalDecomposition().pseudoInverse();
 }
 
 Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)

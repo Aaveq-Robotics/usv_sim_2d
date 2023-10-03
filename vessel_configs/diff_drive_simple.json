@@ -1,0 +1,81 @@
+{
+    "metadata": {
+        "name": "Simple Differential Drive USV",
+        "description": "Simple differential drive USV, with triangle hull shape. Used for testing simulations and template for future vessel configurations.",
+        "author": "Nicoline L. Thomsen",
+        "email": "nicoline@finman.dk"
+    },
+    "actuators": [
+        {
+            "name": "thurst_left",
+            "type": "propeller",
+            "servo_channel": 0,
+            "ang_vel_min": 0.0,
+            "ang_vel_max": 1000.0,
+            "k_t": 0.0000001,
+            "position": {
+                "x": 0.0,
+                "y": -0.1,
+                "z": 0.0
+            },
+            "attitude": {
+                "pitch": 0.0,
+                "yaw": 0.0
+            }
+        },
+        {
+            "name": "thurst_right",
+            "type": "propeller",
+            "servo_channel": 2,
+            "ang_vel_min": 0.0,
+            "ang_vel_max": 1000.0,
+            "k_t": 0.0000001,
+            "position": {
+                "x": 0.0,
+                "y": 0.1,
+                "z": 0.0
+            },
+            "attitude": {
+                "pitch": 0.0,
+                "yaw": 0.0
+            }
+        }
+    ],
+    "points_of_mass": [
+        {
+            "m": 0.25,
+            "x": 0.5,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "m": 0.25,
+            "x": 0.0,
+            "y": 0.1,
+            "z": 0.0
+        },
+        {
+            "m": 0.25,
+            "x": 0.0,
+            "y": -0.1,
+            "z": 0.0
+        }
+    ],
+    "hull_shape": [
+        {
+            "x": 0.5,
+            "y": 0.0,
+            "z": 0.0
+        },
+        {
+            "x": 0.0,
+            "y": 0.1,
+            "z": 0.0
+        },
+        {
+            "x": 0.0,
+            "y": -0.1,
+            "z": 0.0
+        }
+    ]
+}

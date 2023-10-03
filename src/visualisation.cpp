@@ -9,7 +9,7 @@ Visualisation::Visualisation()
 }
 
 // Differential Drive Boat
-void Visualisation::update(DiffDrive &vehice)
+void Visualisation::update(USV &vehice)
 {
     // Handle events
     for (auto event = sf::Event{}; window_.pollEvent(event);)
@@ -32,18 +32,30 @@ void Visualisation::update(DiffDrive &vehice)
     // Origin
     sf::CircleShape shape(5.f);
     shape.setFillColor(sf::Color(255, 255, 50));
-    shape.setPosition(origin_offset_.x + zoom_ * vehice.state.position.x(), origin_offset_.y - zoom_ * vehice.state.position.y()); // y-axis is flipped
+    shape.setPosition(transform_coord_system(vehice.state.position));
     window_.draw(shape);
 
     // Points
-    for (Eigen::Vector3d point : vehice.point_list_earth_)
+    for (Eigen::Vector3d point : vehice.get_point_list_earth())
     {
         shape.setFillColor(sf::Color(255, 50, 50));
-        shape.setPosition(origin_offset_.x + zoom_ * point.x(), origin_offset_.y - zoom_ * point.y()); // y-axis is flipped
+        shape.setPosition(transform_coord_system(point));
         window_.draw(shape);
     }
 
     window_.display();
+}
+
+sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position)
+{
+    sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
+
+    // Zoom factor
+    position_transformed = {position_transformed.x * zoom_, position_transformed.y * zoom_};
+    // Shift origin
+    position_transformed = {position_transformed.x + origin_offset_.x, position_transformed.y + origin_offset_.y};
+
+    return position_transformed;
 }
 
 void Visualisation::draw_grid(int rows, int cols)

@@ -46,14 +46,14 @@ void Visualisation::update(USV &vehice)
     window_.display();
 }
 
-sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position)
+sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, float zoom, sf::Vector2f offset)
 {
     sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
 
     // Zoom factor
-    position_transformed = {position_transformed.x * zoom_, position_transformed.y * zoom_};
+    position_transformed = {position_transformed.x * zoom, position_transformed.y * zoom};
     // Shift origin
-    position_transformed = {position_transformed.x + origin_offset_.x, position_transformed.y + origin_offset_.y};
+    position_transformed = {position_transformed.x + offset.x, position_transformed.y + offset.y};
 
     return position_transformed;
 }

@@ -8,7 +8,6 @@ Visualisation::Visualisation()
     window_.setFramerateLimit(60);
 }
 
-// Differential Drive Boat
 void Visualisation::update(USV &vehice)
 {
     // Handle events
@@ -29,19 +28,33 @@ void Visualisation::update(USV &vehice)
     window_.clear(sf::Color{180, 220, 240});
     draw_grid(10, 10);
 
-    // Origin
-    sf::CircleShape shape(5.f);
-    shape.setFillColor(sf::Color(255, 255, 50));
-    shape.setPosition(transform_coord_system(vehice.state.position));
-    window_.draw(shape);
-
-    // Points
-    for (Eigen::Vector3d point : vehice.get_point_list_earth())
+    // Hull
+    static sf::ConvexShape hull(vehice.get_points_of_hull().size());
+    size_t i = 0;
+    for (Eigen::Vector3d point : vehice.get_points_of_hull())
     {
-        shape.setFillColor(sf::Color(255, 50, 50));
-        shape.setPosition(transform_coord_system(point));
+        sf::Vector2f vertex = transform_coord_system(point, zoom_, origin_offset);
+        hull.setPoint(i, vertex);
+        i++;
+    }
+    hull.setFillColor(sf::Color(50, 50, 50));
+    window_.draw(hull);
+
+    // Mass points
+    static sf::CircleShape shape(5.f);
+    shape.setRadius(5.f);
+    shape.setFillColor(sf::Color(255, 50, 50));
+    for (Eigen::Vector3d point : vehice.get_points_of_mass())
+    {
+        shape.setPosition(transform_coord_system(point, zoom_, origin_offset));
         window_.draw(shape);
     }
+
+    // Origin
+    shape.setRadius(3.f);
+    shape.setFillColor(sf::Color(255, 255, 50));
+    shape.setPosition(transform_coord_system(vehice.state.position, zoom_, origin_offset));
+    window_.draw(shape);
 
     window_.display();
 }

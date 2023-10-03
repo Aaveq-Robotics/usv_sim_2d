@@ -66,7 +66,7 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
         return false;
 
     // Rigid body dynamics
-    Eigen::Vector<double, 6> nu_dot = mass_matrix_.inverse() * tau - mass_matrix_.inverse() * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
+    Eigen::Vector<double, 6> nu_dot = matrix_inverse(mass_matrix_) * tau - matrix_inverse(mass_matrix_) * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
     nu_dot *= timestep;
     nu_ += nu_dot;
 
@@ -212,6 +212,16 @@ std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<
 Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
 {
     return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
+}
+
+Eigen::Matrix<double, 6, 6> USV::matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix)
+{
+    const float epsilon = 1e-6f; // Small tolerance value
+
+    if (matrix.determinant() > epsilon)
+        return matrix.inverse();
+    else
+        return matrix.completeOrthogonalDecomposition().pseudoInverse();
 }
 
 Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)

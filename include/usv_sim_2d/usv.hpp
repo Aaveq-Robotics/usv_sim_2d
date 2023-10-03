@@ -64,6 +64,7 @@ private:
     PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
     std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
     Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);
+    Eigen::Matrix<double, 6, 6> matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix);
 
     Eigen::Matrix3d inertia_matrix(const std::vector<PointMass> &points);
     Eigen::Matrix<double, 6, 6> mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix);

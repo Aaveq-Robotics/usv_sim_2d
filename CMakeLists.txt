@@ -68,19 +68,6 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include)
 
-## diff_drive
-# add_library(diff_drive src/diff_drive.cpp)
-# target_link_libraries(diff_drive usv actuator Eigen3::Eigen jsoncpp)
-# ament_export_targets(diff_drive HAS_LIBRARY_TARGET)
-
-# install(
-#   TARGETS diff_drive
-#   EXPORT diff_drive
-#   LIBRARY DESTINATION lib
-#   ARCHIVE DESTINATION lib
-#   RUNTIME DESTINATION bin
-#   INCLUDES DESTINATION include)
-
 ## visualisation
 add_library(visualisation src/visualisation.cpp)
 target_link_libraries(visualisation usv Eigen3::Eigen sfml-graphics)

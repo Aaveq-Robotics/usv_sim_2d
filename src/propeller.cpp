@@ -32,8 +32,6 @@ Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
     // Compute propulsion moments - the position describes the moment arm
     Eigen::Vector3d torque = position_.cross(thrust);
 
-    std::cout << "[Propeller " << name_ << "]: torque: " << torque << '\n';
-
     // Return forces
     tau << thrust, torque;
     return tau;

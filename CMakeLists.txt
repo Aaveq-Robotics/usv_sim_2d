@@ -103,9 +103,15 @@ add_executable(sim nodes/sim.cpp)
 ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
 target_link_libraries(sim usv visualisation)
 
+# servo_test
+add_executable(servo_test nodes/servo_test.cpp)
+ament_target_dependencies(servo_test rclcpp aaveq_ros_interfaces)
+target_link_libraries(servo_test usv visualisation)
+
 
 install(TARGETS
   sim
+  servo_test
 DESTINATION lib/${PROJECT_NAME})
 
 ############################################################################

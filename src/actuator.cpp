@@ -23,7 +23,7 @@ Actuator::Actuator(Json::Value properties)
 
 Eigen::Vector<double, 6> Actuator::propulsion(const int &servo)
 {
-    std::cout << "Servo sent to non-specified actuator: " << servo << '\n';
+    std::cout << "[Actuator] Servo sent to non-specified actuator: " << servo << '\n';
 
     return Eigen::Vector<double, 6>{
         0.0,

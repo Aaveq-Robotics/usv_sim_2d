@@ -14,6 +14,7 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 		* 4.2.1. [Topics](#Topics-1)
 		* 4.2.2. [Parameters](#Parameters-1)
 * 5. [Usage](#Usage)
+* 6. [Custom Vessels](#CustomVessels)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -21,6 +22,8 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
 
+
+This simulation uses the [NED frame](https://docs.advancednavigation.com/boreas-d/NedCoordSystem.htm).
 
 ##  1. <a name='Cloning'></a>Cloning
 
@@ -111,4 +114,9 @@ For testing, run the servo test node in a seperate terminal:
 ```
 ros2 run usv_sim_2d servo_test
 ```
+
+##  6. <a name='CustomVessels'></a>Custom Vessels
+
+Vessel configrations are described in a custom JSON format, which has to be used in order to specify new vessels for the simulation. Read more under the folder `vessel_configs`.
+
 

@@ -15,7 +15,6 @@ public:
 
 private:
     sf::RenderWindow window_;
-    sf::Vector2f origin_offset_;
 
     const int zoom_ = 100;
 

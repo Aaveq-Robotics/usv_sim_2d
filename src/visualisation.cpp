@@ -23,7 +23,7 @@ void Visualisation::update(USV &vehice)
 
     // Compute middle of window
     sf::Vector2u size = window_.getSize();
-    origin_offset_ = {(float)size.x / 2, (float)size.y / 2};
+    sf::Vector2f origin_offset = {(float)size.x / 2, (float)size.y / 2};
 
     // Draw
     window_.clear(sf::Color{180, 220, 240});

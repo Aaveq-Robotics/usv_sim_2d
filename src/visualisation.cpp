@@ -6,6 +6,11 @@ Visualisation::Visualisation()
 {
     window_.create(sf::VideoMode(800, 600), "USV Simulaiton 2D");
     window_.setFramerateLimit(60);
+
+    // view_.reset(sf::FloatRect(0.0, 0.0, 800.0, 600.0));
+    view_ = window_.getDefaultView();
+    view_.zoom(1 / zoom_);
+    window_.setView(view_);
 }
 
 void Visualisation::update(USV &vehice)
@@ -17,6 +22,13 @@ void Visualisation::update(USV &vehice)
         {
             std::cout << "Closing window, simulation is still running" << '\n';
             window_.close();
+        }
+        if (event.type == sf::Event::MouseWheelMoved)
+        {
+            view_ = window_.getDefaultView();
+            zoom_ = std::max(zoom_ + 2 * event.mouseWheel.delta, 0.f);
+            view_.zoom(1 / zoom_);
+            window_.setView(view_);
         }
     }
 
@@ -33,7 +45,7 @@ void Visualisation::update(USV &vehice)
     size_t i = 0;
     for (Eigen::Vector3d point : vehice.get_points_of_hull())
     {
-        sf::Vector2f vertex = transform_coord_system(point, zoom_, origin_offset);
+        sf::Vector2f vertex = transform_coord_system(point, origin_offset);
         hull.setPoint(i, vertex);
         i++;
     }
@@ -46,7 +58,7 @@ void Visualisation::update(USV &vehice)
     shape.setFillColor(sf::Color(255, 50, 50));
     for (Eigen::Vector3d point : vehice.get_points_of_mass())
     {
-        shape.setPosition(transform_coord_system(point, zoom_, origin_offset));
+        shape.setPosition(transform_coord_system(point, origin_offset));
         window_.draw(shape);
     }
 
@@ -59,12 +71,10 @@ void Visualisation::update(USV &vehice)
     window_.display();
 }
 
-sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, float zoom, sf::Vector2f offset)
+sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset)
 {
     sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
 
-    // Zoom factor
-    position_transformed = {position_transformed.x * zoom, position_transformed.y * zoom};
     // Shift origin
     position_transformed = {position_transformed.x + offset.x, position_transformed.y + offset.y};
 

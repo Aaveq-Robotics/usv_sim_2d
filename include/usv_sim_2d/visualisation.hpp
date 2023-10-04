@@ -15,9 +15,10 @@ public:
 
 private:
     sf::RenderWindow window_;
+    sf::View view_;
 
-    const float zoom_ = 100;
+    float zoom_ = 100;
 
-    sf::Vector2f transform_coord_system(const Eigen::Vector3d &position, float zoom, sf::Vector2f offset);
+    sf::Vector2f transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset);
     void draw_grid();
 };

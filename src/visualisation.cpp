@@ -26,7 +26,7 @@ void Visualisation::update(USV &vehice)
 
     // Draw
     window_.clear(sf::Color{180, 220, 240});
-    draw_grid(10, 10);
+    draw_grid();
 
     // Hull
     static sf::ConvexShape hull(vehice.get_points_of_hull().size());
@@ -71,36 +71,25 @@ sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &positi
     return position_transformed;
 }
 
-void Visualisation::draw_grid(int rows, int cols)
+void Visualisation::draw_grid()
 {
-    /* SOURCE: https://stackoverflow.com/questions/65202726/how-can-i-make-grids-in-sfml-window */
-
-    // initialize values
-    int numLines = rows + cols - 2;
-    sf::VertexArray grid(sf::Lines, 2 * (numLines));
-    window_.setView(window_.getDefaultView());
-    auto size = window_.getView().getSize();
-    float rowH = size.y / rows;
-    float colW = size.x / cols;
+    sf::Vector2u size = window_.getSize();
 
     // row separators
-    for (int i = 0; i < rows - 1; i++)
+    static sf::VertexArray grid_row(sf::Lines, 2 * size.x);
+    for (size_t i = 0; i < (size.x - 2); i++)
     {
-        int r = i + 1;
-        float rowY = rowH * r;
-        grid[i * 2].position = {0, rowY};
-        grid[i * 2 + 1].position = {size.x, rowY};
+        grid_row[i * 2].position = {0.0, (float)i};
+        grid_row[i * 2 + 1].position = {(float)size.x, (float)i};
     }
+    window_.draw(grid_row);
 
     // column separators
-    for (int i = rows - 1; i < numLines; i++)
+    static sf::VertexArray grid_col(sf::Lines, 2 * size.y);
+    for (size_t i = 0; i < size.y; i++)
     {
-        int c = i - rows + 2;
-        float colX = colW * c;
-        grid[i * 2].position = {colX, 0};
-        grid[i * 2 + 1].position = {colX, size.y};
+        grid_col[i * 2].position = {(float)i, 0.0};
+        grid_col[i * 2 + 1].position = {(float)i, (float)size.y};
     }
-
-    // draw it
-    window_.draw(grid);
+    window_.draw(grid_col);
 }

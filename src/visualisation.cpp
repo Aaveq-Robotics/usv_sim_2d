@@ -34,7 +34,7 @@ void Visualisation::update(USV &vehice)
 
     // Compute middle of window
     sf::Vector2u size = window_.getSize();
-    sf::Vector2f origin_offset = {(float)size.x / 2, (float)size.y / 2};
+    sf::Vector2u origin_offset = {size.x / 2, size.y / 2};
 
     // Draw
     window_.clear(sf::Color{180, 220, 240});
@@ -49,13 +49,13 @@ void Visualisation::update(USV &vehice)
         hull.setPoint(i, vertex);
         i++;
     }
-    hull.setFillColor(sf::Color(50, 50, 50));
+    hull.setFillColor(sf::Color(252, 174, 30)); // Orange
     window_.draw(hull);
 
     // Mass points
-    static sf::CircleShape shape(5.f);
-    shape.setRadius(5.f);
-    shape.setFillColor(sf::Color(255, 50, 50));
+    static sf::CircleShape shape;
+    shape.setRadius(0.05);
+    shape.setFillColor(sf::Color(255, 50, 50)); // Red
     for (Eigen::Vector3d point : vehice.get_points_of_mass())
     {
         shape.setPosition(transform_coord_system(point, origin_offset));
@@ -63,9 +63,9 @@ void Visualisation::update(USV &vehice)
     }
 
     // Origin
-    shape.setRadius(3.f);
-    shape.setFillColor(sf::Color(255, 255, 50));
-    shape.setPosition(transform_coord_system(vehice.state.position, zoom_, origin_offset));
+    shape.setRadius(0.02);
+    shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
+    shape.setPosition(transform_coord_system(vehice.state.position, origin_offset));
     window_.draw(shape);
 
     window_.display();

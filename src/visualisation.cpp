@@ -36,6 +36,12 @@ void Visualisation::update(USV &vehice)
     sf::Vector2u size = window_.getSize();
     sf::Vector2u origin_offset = {size.x / 2, size.y / 2};
 
+    if (follow_vessel_)
+    {
+        view_.setCenter(transform_coord_system(vehice.state.position, origin_offset));
+        window_.setView(view_);
+    }
+
     // Draw
     window_.clear(sf::Color{180, 220, 240});
     draw_grid();

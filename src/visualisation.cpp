@@ -87,11 +87,12 @@ void Visualisation::update(USV &vehice)
 sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset)
 {
     sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
+    return {position_transformed.x + offset.x, position_transformed.y + offset.y};
+}
 
-    // Shift origin
-    position_transformed = {position_transformed.x + offset.x, position_transformed.y + offset.y};
-
-    return position_transformed;
+sf::Vector2f Visualisation::transform_coord_system(const sf::Vector2f &position, sf::Vector2u offset)
+{
+    return {position.x + offset.x, position.y + offset.y};
 }
 
 void Visualisation::draw_grid()

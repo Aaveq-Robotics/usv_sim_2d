@@ -87,6 +87,11 @@ void Visualisation::update(USV &vehice)
     window_.display();
 }
 
+sf::Vector2f Visualisation::get_center_circle(sf::Vector2f corner, float radius)
+{
+    return {corner.x - radius, corner.y - radius};
+}
+
 sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset)
 {
     sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};

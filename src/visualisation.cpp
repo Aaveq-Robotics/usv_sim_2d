@@ -57,6 +57,16 @@ void Visualisation::update(USV &vehice)
     draw_grid();
     draw_axis(origin_offset);
 
+    // Wake trail
+    shape.setRadius(0.1);
+    shape.setFillColor(sf::Color(200, 240, 255));
+    wake_trail_.push_back(get_center_circle(transform_coord_system(vehice.state.position, origin_offset), shape.getRadius()));
+    for (sf::Vector2f point : wake_trail_)
+    {
+        shape.setPosition(point);
+        window_.draw(shape);
+    }
+
     // Hull
     static sf::ConvexShape hull(vehice.get_points_of_hull().size());
     size_t i = 0;

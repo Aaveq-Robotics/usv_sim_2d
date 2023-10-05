@@ -19,6 +19,7 @@ private:
 
     float zoom_ = 100;
     bool follow_vessel_ = true;
+    std::vector<sf::Vector2f> wake_trail_;
 
     sf::Texture texture_;
     sf::Sprite sprite_;

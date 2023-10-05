@@ -15,6 +15,8 @@ public:
     ~Actuator() {}
 
     int get_servo_channel() { return servo_channel_; }
+    std::string get_type() { return type_; }
+    Eigen::Vector3d get_position() { return position_; }
     void set_position(Eigen::Vector3d position) { position_ = position; }
 
     virtual Eigen::Vector<double, 6> propulsion(const int &servo);

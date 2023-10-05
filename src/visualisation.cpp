@@ -51,6 +51,7 @@ void Visualisation::update(USV &vehice)
 
     // Draw
     window_.clear(sf::Color{180, 220, 240});
+    static sf::CircleShape shape;
 
     // Grid
     draw_grid();
@@ -68,17 +69,23 @@ void Visualisation::update(USV &vehice)
     hull.setFillColor(sf::Color(252, 174, 30)); // Orange
     window_.draw(hull);
 
-    // Mass points
-    static sf::CircleShape shape;
-    shape.setRadius(0.05);
+    // Actuators
+    shape.setRadius(0.06);
     shape.setFillColor(sf::Color(255, 50, 50)); // Red
-    for (Eigen::Vector3d point : vehice.get_points_of_mass())
+    for (Eigen::Vector3d point : vehice.get_points_of_actuators())
     {
-        shape.setPosition(transform_coord_system(point, origin_offset));
+        shape.setPosition(get_center_circle(transform_coord_system(point, origin_offset), shape.getRadius()));
         window_.draw(shape);
     }
 
+    // Mass points
+    shape.setRadius(0.04);
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
+    for (Eigen::Vector3d point : vehice.get_points_of_mass())
+    {
+        shape.setPosition(get_center_circle(transform_coord_system(point, origin_offset), shape.getRadius()));
+        window_.draw(shape);
+    }
 
     // Center of gravity
     sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));

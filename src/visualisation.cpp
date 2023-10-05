@@ -51,7 +51,10 @@ void Visualisation::update(USV &vehice)
 
     // Draw
     window_.clear(sf::Color{180, 220, 240});
+
+    // Grid
     draw_grid();
+    draw_axis(origin_offset);
 
     // Hull
     static sf::ConvexShape hull(vehice.get_points_of_hull().size());
@@ -116,4 +119,23 @@ void Visualisation::draw_grid()
         grid_col[i * 2 + 1].position = {(float)i, (float)size.y};
     }
     window_.draw(grid_col);
+}
+
+void Visualisation::draw_axis(sf::Vector2u origin)
+{
+    const float line_width = 0.08;
+
+    // X-axis
+    sf::RectangleShape axis_x;
+    axis_x.setPosition(0.0, origin.y - line_width / 2);
+    axis_x.setSize({(float)window_.getSize().x, line_width});
+    axis_x.setFillColor(sf::Color{255, 255, 255, 100});
+    window_.draw(axis_x);
+
+    // Y-axis
+    sf::RectangleShape axis_y;
+    axis_y.setPosition(origin.x - line_width / 2, 0.02);
+    axis_y.setSize({line_width, (float)window_.getSize().y});
+    axis_y.setFillColor(sf::Color{255, 255, 255, 100});
+    window_.draw(axis_y);
 }

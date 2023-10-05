@@ -11,6 +11,13 @@ Visualisation::Visualisation()
     view_ = window_.getDefaultView();
     view_.zoom(1 / zoom_);
     window_.setView(view_);
+
+    // Center of gravity sprite
+    texture_.loadFromFile("src/usv_sim_2d/images/center_of_gravity.png");
+    sprite_.setTexture(texture_);
+    sprite_.setOrigin(texture_.getSize().x / 2, texture_.getSize().y / 2);
+    const float desired_size = 0.2;
+    sprite_.setScale(sf::Vector2f(desired_size / texture_.getSize().x, desired_size / texture_.getSize().y));
 }
 
 void Visualisation::update(USV &vehice)
@@ -68,11 +75,11 @@ void Visualisation::update(USV &vehice)
         window_.draw(shape);
     }
 
-    // Origin
-    shape.setRadius(0.02);
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
-    shape.setPosition(transform_coord_system(vehice.state.position, origin_offset));
-    window_.draw(shape);
+
+    // Center of gravity
+    sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));
+    window_.draw(sprite_);
 
     window_.display();
 }

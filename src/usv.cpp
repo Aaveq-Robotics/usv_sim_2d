@@ -102,6 +102,13 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
         points_of_hull_earth_.push_back(p_earth);
     }
 
+    points_of_actuators_earth_.clear();
+    for (auto actuator : actuators_)
+    {
+        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * actuator->get_position();
+        points_of_actuators_earth_.push_back(p_earth);
+    }
+
     // update successful
     return true;
 }

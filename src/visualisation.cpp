@@ -24,17 +24,29 @@ void Visualisation::update(USV &vehice)
     // Handle events
     for (auto event = sf::Event{}; window_.pollEvent(event);)
     {
-        if (event.type == sf::Event::Closed)
+        switch (event.type)
         {
+        case sf::Event::Closed:
             std::cout << "Closing window, simulation is still running" << '\n';
             window_.close();
-        }
-        if (event.type == sf::Event::MouseWheelMoved)
-        {
+            break;
+
+        case sf::Event::Resized:
+            view_.setSize({static_cast<float>(event.size.width),
+                           static_cast<float>(event.size.height)});
+            view_.zoom(1 / zoom_);
+            window_.setView(view_);
+            break;
+
+        case sf::Event::MouseWheelMoved:
             view_ = window_.getDefaultView();
             zoom_ = std::max(zoom_ + 2 * event.mouseWheel.delta, 0.f);
             view_.zoom(1 / zoom_);
             window_.setView(view_);
+            break;
+
+        default:
+            break;
         }
     }
 

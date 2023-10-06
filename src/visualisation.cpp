@@ -7,7 +7,6 @@ Visualisation::Visualisation()
     window_.create(sf::VideoMode(800, 600), "USV Simulaiton 2D");
     window_.setFramerateLimit(60);
 
-    // view_.reset(sf::FloatRect(0.0, 0.0, 800.0, 600.0));
     view_ = window_.getDefaultView();
     view_.zoom(1 / zoom_);
     window_.setView(view_);
@@ -43,6 +42,7 @@ void Visualisation::update(USV &vehice)
     sf::Vector2u size = window_.getSize();
     sf::Vector2u origin_offset = {size.x / 2, size.y / 2};
 
+    // Manage view
     if (follow_vessel_)
     {
         view_.setCenter(transform_coord_system(vehice.state.position, origin_offset));
@@ -54,20 +54,8 @@ void Visualisation::update(USV &vehice)
     float heading = vehice.state.attitude.z();
 
     window_.clear(sf::Color{180, 220, 240});
-    static sf::CircleShape shape;
-
-    // Grid
-    draw_grid();
-    draw_axis(origin_offset);
-
-    // Mass points
-    shape.setRadius(0.04);
-    shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
-    for (Eigen::Vector3d point : vehice.get_points_of_mass())
-    {
-        shape.setPosition(get_center_circle(transform_coord_system(point, origin_offset), shape.getRadius()));
-        window_.draw(shape);
-    }
+    draw_grid(window_);
+    draw_axis(window_, origin_offset);
     draw_wake_trail(window_, position, heading);
     draw_hull(window_, vehice.get_points_of_hull(), origin_offset);
     draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), origin_offset, heading);
@@ -96,9 +84,9 @@ sf::Vector2f Visualisation::transform_coord_system(const sf::Vector2f &position,
     return {position.x + offset.x, position.y + offset.y};
 }
 
-void Visualisation::draw_grid()
+void Visualisation::draw_grid(sf::RenderWindow &window)
 {
-    sf::Vector2u size = window_.getSize();
+    sf::Vector2u size = window.getSize();
 
     // row separators
     static sf::VertexArray grid_row(sf::Lines, 2 * size.x);
@@ -107,7 +95,7 @@ void Visualisation::draw_grid()
         grid_row[i * 2].position = {0.0, (float)i};
         grid_row[i * 2 + 1].position = {(float)size.x, (float)i};
     }
-    window_.draw(grid_row);
+    window.draw(grid_row);
 
     // column separators
     static sf::VertexArray grid_col(sf::Lines, 2 * size.y);
@@ -116,26 +104,27 @@ void Visualisation::draw_grid()
         grid_col[i * 2].position = {(float)i, 0.0};
         grid_col[i * 2 + 1].position = {(float)i, (float)size.y};
     }
-    window_.draw(grid_col);
+    window.draw(grid_col);
 }
 
-void Visualisation::draw_axis(sf::Vector2u origin)
+void Visualisation::draw_axis(sf::RenderWindow &window, const sf::Vector2u &origin)
 {
     const float line_width = 0.08;
 
     // X-axis
     sf::RectangleShape axis_x;
     axis_x.setPosition(0.0, origin.y - line_width / 2);
-    axis_x.setSize({(float)window_.getSize().x, line_width});
+    axis_x.setSize({(float)window.getSize().x, line_width});
     axis_x.setFillColor(sf::Color{255, 255, 255, 100});
-    window_.draw(axis_x);
+    window.draw(axis_x);
 
     // Y-axis
     sf::RectangleShape axis_y;
-    axis_y.setPosition(origin.x - line_width / 2, 0.02);
-    axis_y.setSize({line_width, (float)window_.getSize().y});
+    axis_y.setPosition(origin.x - line_width / 2, 0.0);
+    axis_y.setSize({line_width, (float)window.getSize().y});
     axis_y.setFillColor(sf::Color{255, 255, 255, 100});
-    window_.draw(axis_y);
+    window.draw(axis_y);
+}
 
 void Visualisation::draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading)
 {

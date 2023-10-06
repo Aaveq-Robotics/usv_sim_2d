@@ -60,18 +60,6 @@ void Visualisation::update(USV &vehice)
     draw_grid();
     draw_axis(origin_offset);
 
-    // Hull
-    static sf::ConvexShape hull(vehice.get_points_of_hull().size());
-    size_t i = 0;
-    for (Eigen::Vector3d point : vehice.get_points_of_hull())
-    {
-        sf::Vector2f vertex = transform_coord_system(point, origin_offset);
-        hull.setPoint(i, vertex);
-        i++;
-    }
-    hull.setFillColor(sf::Color(252, 174, 30)); // Orange
-    window_.draw(hull);
-
     // Mass points
     shape.setRadius(0.04);
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
@@ -81,6 +69,7 @@ void Visualisation::update(USV &vehice)
         window_.draw(shape);
     }
     draw_wake_trail(window_, position, heading);
+    draw_hull(window_, vehice.get_points_of_hull(), origin_offset);
     draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), origin_offset, heading);
 
     // Center of gravity
@@ -167,6 +156,19 @@ void Visualisation::draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f
     window.draw(&wake_trail[0], wake_trail.size(), sf::TriangleStrip);
 }
 
+void Visualisation::draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull, const sf::Vector2u &offset)
+{
+    static sf::ConvexShape hull(points_hull.size());
+    size_t i = 0;
+    for (Eigen::Vector3d point : points_hull)
+    {
+        sf::Vector2f vertex = transform_coord_system(point, offset);
+        hull.setPoint(i, vertex);
+        i++;
+    }
+    hull.setFillColor(sf::Color(252, 174, 30)); // Orange
+    window.draw(hull);
+}
 
 void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const sf::Vector2u &offset, const float &heading)
 {

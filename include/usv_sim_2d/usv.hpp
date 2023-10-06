@@ -38,6 +38,7 @@ public:
     std::vector<Eigen::Vector3d> get_points_of_mass() { return points_of_mass_earth_; };
     std::vector<Eigen::Vector3d> get_points_of_hull() { return points_of_hull_earth_; };
     std::vector<Eigen::Vector3d> get_points_of_actuators() { return points_of_actuators_earth_; };
+    std::vector<double> get_forces_of_actuators() { return forces_of_actuators_; };
 
 private:
     // Member variables
@@ -46,6 +47,7 @@ private:
     std::vector<Eigen::Vector3d> points_of_hull_;
     std::vector<Eigen::Vector3d> points_of_hull_earth_;
     std::vector<Eigen::Vector3d> points_of_actuators_earth_;
+    std::vector<double> forces_of_actuators_;
     Eigen::Vector3d origin_;
     double mass_;
 

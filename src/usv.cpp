@@ -56,8 +56,13 @@ Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &ser
 {
     Eigen::Vector<double, 6> tau{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
+    forces_of_actuators_.clear();
     for (auto actuator : actuators_)
-        tau += actuator->propulsion(servo_out[actuator->get_servo_channel()]);
+    {
+        Eigen::Vector<double, 6> tau_actuator = actuator->propulsion(servo_out[actuator->get_servo_channel()]);
+        forces_of_actuators_.push_back(tau_actuator.head(3).sum() / actuator->get_max_propulsion());
+        tau += tau_actuator;
+    }
 
     return tau;
 }

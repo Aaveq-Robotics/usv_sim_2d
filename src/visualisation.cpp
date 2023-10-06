@@ -71,6 +71,7 @@ void Visualisation::update(USV &vehice)
     draw_wake_trail(window_, position, heading);
     draw_hull(window_, vehice.get_points_of_hull(), origin_offset);
     draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), origin_offset, heading);
+    draw_mass(window_, vehice.get_points_of_mass(), origin_offset);
 
     // Center of gravity
     sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));
@@ -199,4 +200,15 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
     }
     window.draw(&force_trail[0], force_trail.size(), sf::Triangles);
 }
+
+void Visualisation::draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass, const sf::Vector2u &offset)
+{
+    static sf::CircleShape shape;
+    shape.setRadius(0.04);
+    shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
+    for (Eigen::Vector3d point : points_mass)
+    {
+        shape.setPosition(get_center_circle(transform_coord_system(point, offset), shape.getRadius()));
+        window.draw(shape);
+    }
 }

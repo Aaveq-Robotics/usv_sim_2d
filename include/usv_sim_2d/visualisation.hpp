@@ -31,4 +31,5 @@ private:
     void draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading);
     void draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull, const sf::Vector2u &offset);
     void draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const sf::Vector2u &offset, const float &heading);
+    void draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass, const sf::Vector2u &offset);
 };

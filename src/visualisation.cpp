@@ -4,7 +4,7 @@
 
 Visualisation::Visualisation()
 {
-    window_.create(sf::VideoMode(800, 600), "USV Simulaiton 2D");
+    window_.create(sf::VideoMode(1000, 1000), "USV Simulaiton 2D");
     window_.setFramerateLimit(60);
 
     view_ = window_.getDefaultView();

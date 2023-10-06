@@ -101,7 +101,7 @@ void Visualisation::draw_grid(sf::RenderWindow &window)
     sf::Vector2u size = window.getSize();
 
     // row separators
-    static sf::VertexArray grid_row(sf::Lines, 2 * size.x);
+    sf::VertexArray grid_row(sf::Lines, 2 * size.x);
     for (size_t i = 0; i < (size.x - 2); i++)
     {
         grid_row[i * 2].position = {0.0, (float)i};
@@ -110,7 +110,7 @@ void Visualisation::draw_grid(sf::RenderWindow &window)
     window.draw(grid_row);
 
     // column separators
-    static sf::VertexArray grid_col(sf::Lines, 2 * size.y);
+    sf::VertexArray grid_col(sf::Lines, 2 * size.y);
     for (size_t i = 0; i < size.y; i++)
     {
         grid_col[i * 2].position = {(float)i, 0.0};

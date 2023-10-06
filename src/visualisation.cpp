@@ -72,15 +72,6 @@ void Visualisation::update(USV &vehice)
     hull.setFillColor(sf::Color(252, 174, 30)); // Orange
     window_.draw(hull);
 
-    // Actuators
-    shape.setRadius(0.06);
-    shape.setFillColor(sf::Color(255, 50, 50)); // Red
-    for (Eigen::Vector3d point : vehice.get_points_of_actuators())
-    {
-        shape.setPosition(get_center_circle(transform_coord_system(point, origin_offset), shape.getRadius()));
-        window_.draw(shape);
-    }
-
     // Mass points
     shape.setRadius(0.04);
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
@@ -90,6 +81,7 @@ void Visualisation::update(USV &vehice)
         window_.draw(shape);
     }
     draw_wake_trail(window_, position, heading);
+    draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), origin_offset, heading);
 
     // Center of gravity
     sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));
@@ -175,4 +167,34 @@ void Visualisation::draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f
     window.draw(&wake_trail[0], wake_trail.size(), sf::TriangleStrip);
 }
 
+
+void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const sf::Vector2u &offset, const float &heading)
+{
+    const float radius = 0.06;
+
+    std::vector<sf::Vertex> force_trail;
+    static sf::CircleShape shape;
+    shape.setRadius(radius);
+    shape.setFillColor(sf::Color(255, 50, 50)); // Red
+
+    for (size_t i = 0; i < points_actuators.size(); i++)
+    //     for (Eigen::Vector3d point : points_actuators)
+    {
+        sf::Vector2f position = transform_coord_system(points_actuators[i], offset);
+        float force = forces_actuators[i] * (6 * radius); // Set max length to 6*r
+
+        // Draw propulsion
+        sf::Vertex vertex_0({position.x + ((float)cos(heading + M_PI)) * force, position.y + ((float)sin(heading + M_PI)) * force}, sf::Color(255, 50, 50, 100));
+        force_trail.push_back(vertex_0);
+        sf::Vertex vertex_1({position.x + ((float)cos(heading + M_PI_2)) * radius, position.y + ((float)sin(heading + M_PI_2)) * radius}, sf::Color(255, 50, 50, 100));
+        force_trail.push_back(vertex_1);
+        sf::Vertex vertex_2({position.x + ((float)cos(heading - M_PI_2)) * radius, position.y + ((float)sin(heading - M_PI_2)) * radius}, sf::Color(255, 50, 50, 100));
+        force_trail.push_back(vertex_2);
+
+        // Draw points
+        shape.setPosition(get_center_circle(position, shape.getRadius()));
+        window.draw(shape);
+    }
+    window.draw(&force_trail[0], force_trail.size(), sf::Triangles);
+}
 }

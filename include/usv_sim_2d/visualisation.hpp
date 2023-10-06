@@ -29,4 +29,5 @@ private:
     void draw_grid();
     void draw_axis(sf::Vector2u origin);
     void draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading);
+    void draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const sf::Vector2u &offset, const float &heading);
 };

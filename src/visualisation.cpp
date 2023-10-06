@@ -50,22 +50,15 @@ void Visualisation::update(USV &vehice)
     }
 
     // Draw
+    sf::Vector2f position = transform_coord_system(vehice.state.position, origin_offset);
+    float heading = vehice.state.attitude.z();
+
     window_.clear(sf::Color{180, 220, 240});
     static sf::CircleShape shape;
 
     // Grid
     draw_grid();
     draw_axis(origin_offset);
-
-    // Wake trail
-    shape.setRadius(0.1);
-    shape.setFillColor(sf::Color(200, 240, 255));
-    wake_trail_.push_back(get_center_circle(transform_coord_system(vehice.state.position, origin_offset), shape.getRadius()));
-    for (sf::Vector2f point : wake_trail_)
-    {
-        shape.setPosition(point);
-        window_.draw(shape);
-    }
 
     // Hull
     static sf::ConvexShape hull(vehice.get_points_of_hull().size());
@@ -96,6 +89,7 @@ void Visualisation::update(USV &vehice)
         shape.setPosition(get_center_circle(transform_coord_system(point, origin_offset), shape.getRadius()));
         window_.draw(shape);
     }
+    draw_wake_trail(window_, position, heading);
 
     // Center of gravity
     sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));
@@ -160,4 +154,25 @@ void Visualisation::draw_axis(sf::Vector2u origin)
     axis_y.setSize({line_width, (float)window_.getSize().y});
     axis_y.setFillColor(sf::Color{255, 255, 255, 100});
     window_.draw(axis_y);
+
+void Visualisation::draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading)
+{
+    const float line_width = 0.2;
+
+    static std::vector<sf::Vertex> wake_trail;
+    sf::Vertex vertex_0({position.x + ((float)cos(heading + M_PI_2)) * line_width / 2, position.y + ((float)sin(heading + M_PI_2)) * line_width / 2}, sf::Color(255, 255, 255, 100));
+    wake_trail.push_back(vertex_0);
+    sf::Vertex vertex_1({position.x + ((float)cos(heading - M_PI_2)) * line_width / 2, position.y + ((float)sin(heading - M_PI_2)) * line_width / 2}, sf::Color(255, 255, 255, 100));
+    wake_trail.push_back(vertex_1);
+
+    if (wake_trail.size() > 100000) // No more than 100,000 vertices in the wake trail
+    {
+        // Delete the first two verticies
+        wake_trail.erase(begin(wake_trail));
+        wake_trail.erase(begin(wake_trail));
+    }
+
+    window.draw(&wake_trail[0], wake_trail.size(), sf::TriangleStrip);
+}
+
 }

@@ -57,12 +57,12 @@ void Visualisation::update(USV &vehice)
     // Manage view
     if (follow_vessel_)
     {
-        view_.setCenter(transform_coord_system(vehice.state.position, origin_offset));
+        view_.setCenter(eigen_2_sfml(vehice.state.position));
         window_.setView(view_);
     }
 
     // Draw
-    sf::Vector2f position = transform_coord_system(vehice.state.position, origin_offset);
+    sf::Vector2f position = eigen_2_sfml(vehice.state.position);
     float heading = vehice.state.attitude.z();
 
     window_.clear(sf::Color{180, 220, 240});
@@ -74,21 +74,15 @@ void Visualisation::update(USV &vehice)
     draw_mass(window_, vehice.get_points_of_mass(), origin_offset);
 
     // Center of gravity
-    sprite_.setPosition(transform_coord_system(vehice.state.position, origin_offset));
+    sprite_.setPosition(eigen_2_sfml(vehice.state.position));
     window_.draw(sprite_);
 
     window_.display();
 }
 
-sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset)
+sf::Vector2f Visualisation::eigen_2_sfml(const Eigen::Vector3d &position)
 {
-    sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
-    return {position_transformed.x + offset.x, position_transformed.y + offset.y};
-}
-
-sf::Vector2f Visualisation::transform_coord_system(const sf::Vector2f &position, sf::Vector2u offset)
-{
-    return {position.x + offset.x, position.y + offset.y};
+    return {(float)position.x(), (float)position.y()};
 }
 
 void Visualisation::draw_grid(sf::RenderWindow &window)
@@ -159,8 +153,7 @@ void Visualisation::draw_hull(sf::RenderWindow &window, const std::vector<Eigen:
     size_t i = 0;
     for (Eigen::Vector3d point : points_hull)
     {
-        sf::Vector2f vertex = transform_coord_system(point, offset);
-        hull.setPoint(i, vertex);
+        hull.setPoint(i, eigen_2_sfml(point));
         i++;
     }
     hull.setFillColor(sf::Color(252, 174, 30)); // Orange
@@ -180,7 +173,7 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
     for (size_t i = 0; i < points_actuators.size(); i++)
     //     for (Eigen::Vector3d point : points_actuators)
     {
-        sf::Vector2f position = transform_coord_system(points_actuators[i], offset);
+        sf::Vector2f position = eigen_2_sfml(points_actuators[i]);
         float force = forces_actuators[i] * (6 * radius); // Set max length to 6*r
 
         // Draw propulsion
@@ -209,7 +202,7 @@ void Visualisation::draw_mass(sf::RenderWindow &window, const std::vector<Eigen:
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
     for (Eigen::Vector3d point : points_mass)
     {
-        shape.setPosition(transform_coord_system(point, offset));
+        shape.setPosition(eigen_2_sfml(point));
         window.draw(shape);
     }
 }

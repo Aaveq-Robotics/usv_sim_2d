@@ -25,8 +25,8 @@ private:
 
     sf::Vector2f eigen_2_sfml(const Eigen::Vector3d &position);
 
-    void draw_grid(sf::RenderWindow &window);
-    void draw_axis(sf::RenderWindow &window);
+    void draw_grid(sf::RenderWindow &window, sf::Vector2u grid_size);
+    void draw_axis(sf::RenderWindow &window, sf::Vector2u grid_size, const float &line_width);
     void draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading);
     void draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull);
     void draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const float &heading);

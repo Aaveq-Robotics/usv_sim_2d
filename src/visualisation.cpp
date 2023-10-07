@@ -62,8 +62,8 @@ void Visualisation::update(USV &vehice)
     float heading = vehice.state.attitude.z();
 
     window_.clear(sf::Color{180, 220, 240});
-    draw_grid(window_);
-    draw_axis(window_);
+    draw_grid(window_, {1000, 1000});
+    draw_axis(window_, {1000, 1000}, 0.08);
     draw_wake_trail(window_, position, heading);
     draw_hull(window_, vehice.get_points_of_hull());
     draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), heading);
@@ -81,47 +81,48 @@ sf::Vector2f Visualisation::eigen_2_sfml(const Eigen::Vector3d &position)
     return {(float)position.x(), (float)position.y()};
 }
 
-void Visualisation::draw_grid(sf::RenderWindow &window)
+void Visualisation::draw_grid(sf::RenderWindow &window, sf::Vector2u grid_size)
 {
-    sf::Vector2u size = window.getSize();
-    size.x += size.x % 2;
-    size.y += size.y % 2;
+    // Size has to be even numbers to align grid with origin
+    grid_size.x += grid_size.x % 2;
+    grid_size.y += grid_size.y % 2;
 
     // row separators
-    sf::VertexArray grid_row(sf::Lines, 2 * size.x + 2);
-    for (size_t i = 0; i <= (size.x); i++)
+    sf::VertexArray grid_row(sf::Lines, 2 * grid_size.x + 2);
+    for (size_t i = 0; i <= (grid_size.x); i++)
     {
-        grid_row[i * 2].position = {-(float)size.x / 2, (float)i - (float)size.y / 2};
-        grid_row[i * 2 + 1].position = {(float)size.x / 2, (float)i - (float)size.y / 2};
+        grid_row[i * 2].position = {-(float)grid_size.x / 2, (float)i - (float)grid_size.y / 2};
+        grid_row[i * 2 + 1].position = {(float)grid_size.x / 2, (float)i - (float)grid_size.y / 2};
     }
     window.draw(grid_row);
 
     // column separators
-    sf::VertexArray grid_col(sf::Lines, 2 * size.y + 2);
-    for (size_t i = 0; i <= size.y; i++)
+    sf::VertexArray grid_col(sf::Lines, 2 * grid_size.y + 2);
+    for (size_t i = 0; i <= grid_size.y; i++)
     {
-        grid_col[i * 2].position = {(float)i - (float)size.x / 2, -(float)size.y / 2};
-        grid_col[i * 2 + 1].position = {(float)i - (float)size.x / 2, (float)size.y / 2};
+        grid_col[i * 2].position = {(float)i - (float)grid_size.x / 2, -(float)grid_size.y / 2};
+        grid_col[i * 2 + 1].position = {(float)i - (float)grid_size.x / 2, (float)grid_size.y / 2};
     }
     window.draw(grid_col);
 }
 
-void Visualisation::draw_axis(sf::RenderWindow &window)
+void Visualisation::draw_axis(sf::RenderWindow &window, sf::Vector2u grid_size, const float &line_width)
 {
-    const float line_width = 0.08;
-    sf::Vector2u size = window_.getSize();
+    // Size has to be even numbers to align grid with origin
+    grid_size.x += grid_size.x % 2;
+    grid_size.y += grid_size.y % 2;
 
     // X-axis
     sf::RectangleShape axis_x;
-    axis_x.setPosition(-(float)size.x / 2, -line_width / 2);
-    axis_x.setSize({(float)size.x, line_width});
+    axis_x.setPosition(-(float)grid_size.x / 2, -line_width / 2);
+    axis_x.setSize({(float)grid_size.x, line_width});
     axis_x.setFillColor(sf::Color{255, 255, 255, 100});
     window.draw(axis_x);
 
     // Y-axis
     sf::RectangleShape axis_y;
-    axis_y.setPosition(-line_width / 2, -(float)size.y / 2);
-    axis_y.setSize({line_width, (float)size.y});
+    axis_y.setPosition(-line_width / 2, -(float)grid_size.y / 2);
+    axis_y.setSize({line_width, (float)grid_size.y});
     axis_y.setFillColor(sf::Color{255, 255, 255, 100});
     window.draw(axis_y);
 }

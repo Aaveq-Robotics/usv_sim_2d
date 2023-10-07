@@ -24,7 +24,7 @@ The format consists of four objects: `metadata`, `actuators`, `points_of_mass`, 
 All positions will be recomputed relative to the centre of mass when processed by the simulation, so all positions described here just have to have the correct position relative to each other.
 Positions towards positive x are towards the bow, and positive along y are the starboard side, see image below.
 
-<img src="../images/boat_NED.png" alt="boat_NED.png" style="width:200px;"/>
+<img src="../assets/images/boat_NED.png" alt="boat_NED.png" style="width:200px;"/>
 
 ###  1.1. <a name='metadata'></a>`metadata`
 

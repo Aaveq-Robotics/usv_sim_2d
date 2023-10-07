@@ -12,7 +12,7 @@ Visualisation::Visualisation()
     window_.setView(view_);
 
     // Center of gravity sprite
-    texture_.loadFromFile("src/usv_sim_2d/images/center_of_gravity.png");
+    texture_.loadFromFile("src/usv_sim_2d/assets/images/center_of_gravity.png");
     sprite_.setTexture(texture_);
     sprite_.setOrigin(texture_.getSize().x / 2, texture_.getSize().y / 2);
     const float desired_size = 0.2;

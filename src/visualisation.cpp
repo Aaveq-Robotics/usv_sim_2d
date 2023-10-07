@@ -50,10 +50,6 @@ void Visualisation::update(USV &vehice)
         }
     }
 
-    // Compute middle of window
-    sf::Vector2u size = window_.getSize();
-    sf::Vector2u origin_offset = {size.x / 2, size.y / 2};
-
     // Manage view
     if (follow_vessel_)
     {
@@ -67,11 +63,11 @@ void Visualisation::update(USV &vehice)
 
     window_.clear(sf::Color{180, 220, 240});
     draw_grid(window_);
-    draw_axis(window_, origin_offset);
+    draw_axis(window_);
     draw_wake_trail(window_, position, heading);
-    draw_hull(window_, vehice.get_points_of_hull(), origin_offset);
-    draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), origin_offset, heading);
-    draw_mass(window_, vehice.get_points_of_mass(), origin_offset);
+    draw_hull(window_, vehice.get_points_of_hull());
+    draw_actuators(window_, vehice.get_points_of_actuators(), vehice.get_forces_of_actuators(), heading);
+    draw_mass(window_, vehice.get_points_of_mass());
 
     // Center of gravity
     sprite_.setPosition(eigen_2_sfml(vehice.state.position));
@@ -88,41 +84,44 @@ sf::Vector2f Visualisation::eigen_2_sfml(const Eigen::Vector3d &position)
 void Visualisation::draw_grid(sf::RenderWindow &window)
 {
     sf::Vector2u size = window.getSize();
+    size.x += size.x % 2;
+    size.y += size.y % 2;
 
     // row separators
-    sf::VertexArray grid_row(sf::Lines, 2 * size.x);
-    for (size_t i = 0; i < (size.x - 2); i++)
+    sf::VertexArray grid_row(sf::Lines, 2 * size.x + 2);
+    for (size_t i = 0; i <= (size.x); i++)
     {
-        grid_row[i * 2].position = {0.0, (float)i};
-        grid_row[i * 2 + 1].position = {(float)size.x, (float)i};
+        grid_row[i * 2].position = {-(float)size.x / 2, (float)i - (float)size.y / 2};
+        grid_row[i * 2 + 1].position = {(float)size.x / 2, (float)i - (float)size.y / 2};
     }
     window.draw(grid_row);
 
     // column separators
-    sf::VertexArray grid_col(sf::Lines, 2 * size.y);
-    for (size_t i = 0; i < size.y; i++)
+    sf::VertexArray grid_col(sf::Lines, 2 * size.y + 2);
+    for (size_t i = 0; i <= size.y; i++)
     {
-        grid_col[i * 2].position = {(float)i, 0.0};
-        grid_col[i * 2 + 1].position = {(float)i, (float)size.y};
+        grid_col[i * 2].position = {(float)i - (float)size.x / 2, -(float)size.y / 2};
+        grid_col[i * 2 + 1].position = {(float)i - (float)size.x / 2, (float)size.y / 2};
     }
     window.draw(grid_col);
 }
 
-void Visualisation::draw_axis(sf::RenderWindow &window, const sf::Vector2u &origin)
+void Visualisation::draw_axis(sf::RenderWindow &window)
 {
     const float line_width = 0.08;
+    sf::Vector2u size = window_.getSize();
 
     // X-axis
     sf::RectangleShape axis_x;
-    axis_x.setPosition(0.0, origin.y - line_width / 2);
-    axis_x.setSize({(float)window.getSize().x, line_width});
+    axis_x.setPosition(-(float)size.x / 2, -line_width / 2);
+    axis_x.setSize({(float)size.x, line_width});
     axis_x.setFillColor(sf::Color{255, 255, 255, 100});
     window.draw(axis_x);
 
     // Y-axis
     sf::RectangleShape axis_y;
-    axis_y.setPosition(origin.x - line_width / 2, 0.0);
-    axis_y.setSize({line_width, (float)window.getSize().y});
+    axis_y.setPosition(-line_width / 2, -(float)size.y / 2);
+    axis_y.setSize({line_width, (float)size.y});
     axis_y.setFillColor(sf::Color{255, 255, 255, 100});
     window.draw(axis_y);
 }
@@ -147,7 +146,7 @@ void Visualisation::draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f
     window.draw(&wake_trail[0], wake_trail.size(), sf::TriangleStrip);
 }
 
-void Visualisation::draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull, const sf::Vector2u &offset)
+void Visualisation::draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull)
 {
     static sf::ConvexShape hull(points_hull.size());
     size_t i = 0;
@@ -160,7 +159,7 @@ void Visualisation::draw_hull(sf::RenderWindow &window, const std::vector<Eigen:
     window.draw(hull);
 }
 
-void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const sf::Vector2u &offset, const float &heading)
+void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const float &heading)
 {
     const float radius = 0.06;
 
@@ -191,7 +190,7 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
     window.draw(&force_trail[0], force_trail.size(), sf::Triangles);
 }
 
-void Visualisation::draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass, const sf::Vector2u &offset)
+void Visualisation::draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass)
 {
     const float radius = 0.04;
 

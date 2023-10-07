@@ -80,11 +80,6 @@ void Visualisation::update(USV &vehice)
     window_.display();
 }
 
-sf::Vector2f Visualisation::get_center_circle(sf::Vector2f corner, float radius)
-{
-    return {corner.x - radius, corner.y - radius};
-}
-
 sf::Vector2f Visualisation::transform_coord_system(const Eigen::Vector3d &position, sf::Vector2u offset)
 {
     sf::Vector2f position_transformed = {(float)position.x(), (float)position.y()};
@@ -179,6 +174,7 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
     std::vector<sf::Vertex> force_trail;
     static sf::CircleShape shape;
     shape.setRadius(radius);
+    shape.setOrigin(radius, radius);
     shape.setFillColor(sf::Color(255, 50, 50)); // Red
 
     for (size_t i = 0; i < points_actuators.size(); i++)
@@ -196,7 +192,7 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
         force_trail.push_back(vertex_2);
 
         // Draw points
-        shape.setPosition(get_center_circle(position, shape.getRadius()));
+        shape.setPosition(position);
         window.draw(shape);
     }
     window.draw(&force_trail[0], force_trail.size(), sf::Triangles);
@@ -204,12 +200,16 @@ void Visualisation::draw_actuators(sf::RenderWindow &window, const std::vector<E
 
 void Visualisation::draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass, const sf::Vector2u &offset)
 {
+    const float radius = 0.04;
+
     static sf::CircleShape shape;
-    shape.setRadius(0.04);
+    shape.setRadius(radius);
+    shape.setOrigin(radius, radius);
+
     shape.setFillColor(sf::Color(255, 255, 50)); // Yellow
     for (Eigen::Vector3d point : points_mass)
     {
-        shape.setPosition(get_center_circle(transform_coord_system(point, offset), shape.getRadius()));
+        shape.setPosition(transform_coord_system(point, offset));
         window.draw(shape);
     }
 }

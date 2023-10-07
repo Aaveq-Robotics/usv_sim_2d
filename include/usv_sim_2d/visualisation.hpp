@@ -23,6 +23,7 @@ private:
     sf::Texture texture_;
     sf::Sprite sprite_;
 
+    void update_view(sf::RenderWindow &window, sf::View &view, sf::Vector2f size, float zoom);
     sf::Vector2f eigen_2_sfml(const Eigen::Vector3d &position);
 
     void draw_grid(sf::RenderWindow &window, sf::Vector2u grid_size);

@@ -32,17 +32,12 @@ void Visualisation::update(USV &vehice)
             break;
 
         case sf::Event::Resized:
-            view_.setSize({static_cast<float>(event.size.width),
-                           static_cast<float>(event.size.height)});
-            view_.zoom(1 / zoom_);
-            window_.setView(view_);
+            update_view(window_, view_, {(float)event.size.width, (float)event.size.height}, zoom_);
             break;
 
         case sf::Event::MouseWheelMoved:
-            view_ = window_.getDefaultView();
             zoom_ = std::max(zoom_ + 2 * event.mouseWheel.delta, 0.f);
-            view_.zoom(1 / zoom_);
-            window_.setView(view_);
+            update_view(window_, view_, {(float)window_.getSize().x, (float)window_.getSize().y}, zoom_);
             break;
 
         default:
@@ -74,6 +69,14 @@ void Visualisation::update(USV &vehice)
     window_.draw(sprite_);
 
     window_.display();
+}
+
+void Visualisation::update_view(sf::RenderWindow &window, sf::View &view, sf::Vector2f size, float zoom)
+{
+    view = window.getDefaultView();
+    view.setSize({size.x, size.y});
+    view.zoom(1 / zoom);
+    window.setView(view);
 }
 
 sf::Vector2f Visualisation::eigen_2_sfml(const Eigen::Vector3d &position)

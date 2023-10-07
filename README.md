@@ -25,6 +25,7 @@ Simlation of the rigid body dynamics of a simple differential drive USV in 2D, i
 
 This simulation uses the [NED frame](https://docs.advancednavigation.com/boreas-d/NedCoordSystem.htm).
 
+![sim_showcase](images/sim_showcase.gif)
 ##  1. <a name='Cloning'></a>Cloning
 
 Clone this package to a ROS 2 workspace:

@@ -204,8 +204,3 @@ Eigen::Matrix<double, 6, 6> USV::J_Theta(const Eigen::Vector<double, 6> &eta)
 
     return J_Theta;
 }
-
-double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
-{
-    return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0);
-}

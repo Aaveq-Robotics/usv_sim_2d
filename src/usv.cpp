@@ -21,31 +21,14 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
         2. steering (really just turn rate omega)
      */
 
-    state.timestamp = USV::micros(); // TODO: Timestamp needs to be double!!
-    double timestep = state.timestamp - state_old.timestamp;
-
-    if (timestep < 0)
-    {
-        // the sim is trying to go backwards in time
-        std::cout << "[USV] Error: Time went backwards" << std::endl;
+    // Update time
+    double timestep = update_timestamp();
+    if (timestep < 0.0)
         return false;
-    }
-    else if (timestep == 0)
-    {
-        // time did not advance. no physics step
-        std::cout << "[USV] Warning: Time did not step forward" << std::endl;
-        return false;
-    }
-    else if (timestep > 60)
-    {
-        // limiting timestep to less than 1 minute
-        std::cout << "[USV] Warning: Time step was very large" << std::endl;
-        return false;
-    }
 
     // how fast is the rover moving
     double max_velocity = 1.0; // m/s
-    double body_v = _interp1D(servo_out[2], 1100.0, 1900.0, -max_velocity, max_velocity);
+    double body_v = interval_map(servo_out[2], 1100.0, 1900.0, -max_velocity, max_velocity);
 
     // update the state
     state.velocity[0] = body_v;
@@ -62,13 +45,40 @@ bool USV::update(std::array<uint16_t, 16> servo_out)
     return true;
 }
 
-uint64_t USV::micros()
+double USV::micros()
 {
     uint64_t us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-    return (double)us / 1000000.0;
+    return (double)us / 1000000.0; // Convert to seconds
 }
 
-double USV::_interp1D(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
+double USV::update_timestamp()
+{
+    state.timestamp = USV::micros();
+    double timestep = state.timestamp - state_old.timestamp;
+
+    if (timestep < 0.0)
+    {
+        // the sim is trying to go backwards in time
+        std::cout << "[USV] Error: Time went backwards" << std::endl;
+        return 0.0;
+    }
+    else if (timestep == 0.0)
+    {
+        // time did not advance. no physics step
+        std::cout << "[USV] Warning: Time did not step forward" << std::endl;
+        return 0.0;
+    }
+    else if (timestep > 60)
+    {
+        // limiting timestep to less than 1 minute
+        std::cout << "[USV] Warning: Time step was very large" << std::endl;
+        return 0.0;
+    }
+
+    return timestep;
+}
+
+double USV::interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1)
 {
     return ((y0 * (x1 - x)) + (y1 * (x - x0))) / (x1 - x0);
 }

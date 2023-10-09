@@ -1,3 +1,5 @@
+#pragma once
+
 #include <chrono>
 #include <time.h>
 #include <Eigen/Dense>
@@ -7,7 +9,7 @@ class USV
 public:
     struct VechicleState
     {
-        double timestamp = 0;
+        double timestamp = 0.0;
 
         Eigen::Vector3d gyro;
         Eigen::Vector3d accel;
@@ -16,13 +18,17 @@ public:
         Eigen::Vector3d velocity;
     } state, state_old;
 
+    std::vector<Eigen::Vector3d> point_list;
+
     USV();
     ~USV() {}
 
     bool update(std::array<uint16_t, 16> servo_out);
 
-private:
-    uint64_t micros();
+protected:
+    double micros();
+    double update_timestamp();
 
-    double _interp1D(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
+private:
+    double interval_map(const double &x, const double &x0, const double &x1, const double &y0, const double &y1);
 };

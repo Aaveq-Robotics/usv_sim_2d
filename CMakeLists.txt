@@ -7,33 +7,20 @@ set(CMAKE_CXX_STANDARD 20)
 
 ############################################################################
 
-
 # Dependencies
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(SFML COMPONENTS graphics REQUIRED)
 
 find_package(aaveq_ros_interfaces REQUIRED)
 
 ############################################################################
 
-# FetchContent
-
-include(FetchContent)
-
-FetchContent_Declare(
-  eigen
-  GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-  GIT_TAG master 
-  )
-
-FetchContent_MakeAvailable(eigen)
-  
-############################################################################
-
-# Library
+# Libraries
 
 include_directories(include)
 
@@ -42,12 +29,36 @@ install(
   DESTINATION include)
 
 add_library(usv src/usv.cpp)
-target_link_libraries(usv eigen)
+target_link_libraries(usv Eigen3::Eigen)
 ament_export_targets(usv HAS_LIBRARY_TARGET)
 
 install(
   TARGETS usv
   EXPORT usv
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
+
+add_library(diff_drive src/diff_drive.cpp)
+target_link_libraries(diff_drive usv Eigen3::Eigen)
+ament_export_targets(diff_drive HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS diff_drive
+  EXPORT diff_drive
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include)
+
+add_library(visualisation src/visualisation.cpp)
+target_link_libraries(visualisation diff_drive Eigen3::Eigen sfml-graphics)
+ament_export_targets(visualisation HAS_LIBRARY_TARGET)
+
+install(
+  TARGETS visualisation
+  EXPORT visualisation
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -60,7 +71,7 @@ install(
 # sim
 add_executable(sim nodes/sim.cpp)
 ament_target_dependencies(sim rclcpp std_msgs geometry_msgs aaveq_ros_interfaces)
-target_link_libraries(sim usv)
+target_link_libraries(sim diff_drive visualisation)
 
 
 install(TARGETS

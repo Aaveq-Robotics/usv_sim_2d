@@ -16,6 +16,7 @@
   <depend>sfml-dev</depend>
   <depend>libjsoncpp-dev</depend>
 
+  <depend>aaveq_dynamics</depend>
   <depend>aaveq_ros_interfaces</depend>
 
   <export>

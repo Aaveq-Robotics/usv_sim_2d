@@ -27,7 +27,7 @@ void USV::load_vessel_config(std::string vessel_config_path)
 
     // Load points of mass
     for (auto point : vessel_config["points_of_mass"])
-        points_of_mass_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+        points_of_mass_.push_back(ADynamics::PointMass({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble(), point["m"].asDouble()}));
 
     for (auto point : vessel_config["hull_shape"])
         points_of_hull_.push_back({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
@@ -36,8 +36,8 @@ void USV::load_vessel_config(std::string vessel_config_path)
     origin_ = compute_com(points_of_mass_, mass_);
     points_of_mass_ = recompute_relative_to_origin(points_of_mass_, origin_); // Ensures that the USV position is equal to the origin
     points_of_hull_ = recompute_relative_to_origin(points_of_hull_, origin_); // Ensures that the USV position is equal to the origin
-    inertia_matrix_ = inertia_matrix(points_of_mass_);
-    mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
+    inertia_matrix_ = ADynamics::inertia_matrix(points_of_mass_);
+    mass_matrix_ = ADynamics::mass_matrix(mass_, inertia_matrix_);
 
     for (auto actuator_config : vessel_config["actuators"])
     {
@@ -67,50 +67,46 @@ Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &ser
     return tau;
 }
 
-bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
+bool USV::update_state(const Eigen::Vector<double, 6> &tau)
 {
     // Update time
     double timestep = update_timestamp();
     if (timestep < 0.0)
         return false;
 
-    // Rigid body dynamics
-    Eigen::Vector<double, 6> nu_dot = matrix_inverse(mass_matrix_) * tau - matrix_inverse(mass_matrix_) * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
-    nu_dot *= timestep;
-    nu_ += nu_dot;
+    Eigen::Vector<double, 6> state_body_dot;
+    Eigen::Vector<double, 6> state_earth_dot;
 
-    // Body-fixed frame to earth-fixed frame
-    Eigen::Vector<double, 6> eta_dot = J_Theta(eta_) * nu_;
-    eta_dot *= timestep;
-    eta_ += eta_dot;
+    // Rigid body dynamics
+    std::tie(state_body_, state_body_dot, state_earth_, state_earth_dot) = ADynamics::rigid_body_dynamics(timestep, tau, state_body_, state_earth_, mass_, inertia_matrix_, mass_matrix_);
 
     // Pass values
-    state.gyro = nu_.tail(3);
-    state.accel = nu_dot.head(3);
-    state.position = eta_.head(3);
-    state.attitude = eta_.tail(3);
-    state.velocity = eta_dot.head(3);
+    state.gyro = state_body_.tail(3);
+    state.accel = state_body_dot.head(3);
+    state.position = state_earth_.head(3);
+    state.attitude = state_earth_.tail(3);
+    state.velocity = state_earth_dot.head(3);
 
     // Body to Earth
     points_of_mass_earth_.clear();
     for (auto p : points_of_mass_)
     {
-        Eigen::Vector3d p_body{p.x, p.y, p.z};
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        Eigen::Vector3d p_body = p.head(3);
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
         points_of_mass_earth_.push_back(p_earth);
     }
 
     points_of_hull_earth_.clear();
     for (auto p_body : points_of_hull_)
     {
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
         points_of_hull_earth_.push_back(p_earth);
     }
 
     points_of_actuators_earth_.clear();
     for (auto actuator : actuators_)
     {
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * actuator->get_position();
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * actuator->get_position();
         points_of_actuators_earth_.push_back(p_earth);
     }
 
@@ -164,26 +160,27 @@ double USV::update_timestamp()
 
 void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_condition)
 {
-    eta_ = initial_condition;
+    state_earth_ = initial_condition;
 }
 
-double USV::compute_mass(const std::vector<USV::PointMass> &points)
+double USV::compute_mass(const std::vector<ADynamics::PointMass> &points)
 {
     double sum = 0.0;
     for (auto p : points)
-        sum += p.m;
+        sum += p.m();
 
     return sum;
 }
-Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, const double &mass)
+
+Eigen::Vector3d USV::compute_com(const std::vector<ADynamics::PointMass> &points, const double &mass)
 {
     // Compute center of mass
     Eigen::Vector3d com{0.0, 0.0, 0.0};
     for (auto p : points)
     {
-        com[0] += p.m * p.x;
-        com[1] += p.m * p.y;
-        com[2] += p.m * p.z;
+        com[0] += p.m() * p.x();
+        com[1] += p.m() * p.y();
+        com[2] += p.m() * p.z();
     }
 
     com[0] /= mass;
@@ -193,9 +190,10 @@ Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, cons
     return com;
 }
 
-Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com)
+template <typename EigenVec>
+EigenVec USV::recompute_relative_to_origin(const EigenVec &point, const Eigen::Vector3d &com)
 {
-    Eigen::Vector3d point_recomputed = point;
+    EigenVec point_recomputed = point;
 
     // Recompute coordinates of points relative to com (origin)
     point_recomputed.x() -= com.x();
@@ -205,9 +203,10 @@ Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, 
     return point_recomputed;
 }
 
-std::vector<Eigen::Vector3d> USV::recompute_relative_to_origin(const std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &com)
+template <typename EigenVec>
+std::vector<EigenVec> USV::recompute_relative_to_origin(const std::vector<EigenVec> &points, const Eigen::Vector3d &com)
 {
-    std::vector<Eigen::Vector3d> points_recomputed = points;
+    std::vector<EigenVec> points_recomputed = points;
 
     // Recompute coordinates of points relative to com (origin)
     size_t i = 0;
@@ -218,112 +217,4 @@ std::vector<Eigen::Vector3d> USV::recompute_relative_to_origin(const std::vector
     }
 
     return points_recomputed;
-}
-
-USV::PointMass USV::recompute_relative_to_origin(const USV::PointMass &point, const Eigen::Vector3d &com)
-{
-    USV::PointMass point_recomputed = point;
-
-    // Recompute coordinates of points relative to com (origin)
-    point_recomputed.x -= com.x();
-    point_recomputed.y -= com.y();
-    point_recomputed.z -= com.z();
-
-    return point_recomputed;
-}
-
-std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points, const Eigen::Vector3d &com)
-{
-    std::vector<USV::PointMass> points_recomputed = points;
-
-    // Recompute coordinates of points relative to com (origin)
-    size_t i = 0;
-    for (auto point : points_recomputed)
-    {
-        points_recomputed[i] = recompute_relative_to_origin(point, com);
-        i++;
-    }
-
-    return points_recomputed;
-}
-
-Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
-{
-    return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
-}
-
-Eigen::Matrix<double, 6, 6> USV::matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix)
-{
-    const float epsilon = 1e-6f; // Small tolerance value
-
-    if (matrix.determinant() > epsilon)
-        return matrix.inverse();
-    else
-        return matrix.completeOrthogonalDecomposition().pseudoInverse();
-}
-
-Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)
-{
-    auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
-    {
-        return Eigen::Matrix3d{{std::pow(y, 2) + std::pow(z, 2), -x * y, -x * z},
-                               {-x * y, std::pow(x, 2) + std::pow(z, 2), -y * z},
-                               {-x * z, -y * z, std::pow(x, 2) + std::pow(y, 2)}};
-    };
-
-    Eigen::Matrix3d I;
-    for (auto p : points)
-        I += p.m * inertia(p.x, p.y, p.z);
-
-    return I;
-}
-
-Eigen::Matrix<double, 6, 6> USV::mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix)
-{
-    Eigen::Matrix<double, 6, 6> mass_matrix;
-    mass_matrix << mass * Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), inertia_matrix;
-
-    return mass_matrix;
-}
-
-Eigen::Matrix<double, 6, 6> USV::coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu)
-{
-    Eigen::Vector<double, 3> omega = nu.tail(3); // Get last 3 elements
-    Eigen::Matrix<double, 6, 6> coriolis_matrix;
-    coriolis_matrix << mass * skew_symmetric_matrix(omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), -skew_symmetric_matrix(inertia_matrix * omega);
-
-    return coriolis_matrix;
-}
-
-Eigen::Matrix3d USV::rotation_matrix_eb(const Eigen::Vector3d &attitude)
-{
-    double phi = attitude.x();
-    double theta = attitude.y();
-    double psi = attitude.z();
-
-    // Rotation of earth-fixed (NED) frame with respect to body-fixed frame
-    Eigen::Matrix3d Rx{{1, 0, 0}, {0, cos(phi), -sin(phi)}, {0, sin(phi), cos(phi)}};
-    Eigen::Matrix3d Ry{{cos(theta), 0, sin(theta)}, {0, 1, 0}, {-sin(theta), 0, cos(theta)}};
-    Eigen::Matrix3d Rz{{cos(psi), -sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
-
-    return Rz * Ry * Rx;
-}
-
-Eigen::Matrix3d USV::transformation_matrix(const Eigen::Vector3d &attitude)
-{
-    double phi = attitude.x();
-    double theta = attitude.y();
-
-    return Eigen::Matrix3d{{1, sin(phi) * (sin(theta) / cos(theta)), cos(phi) * (sin(theta) / cos(theta))},
-                           {0, cos(phi), -sin(phi)},
-                           {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
-}
-
-Eigen::Matrix<double, 6, 6> USV::J_Theta(const Eigen::Vector<double, 6> &eta)
-{
-    Eigen::Vector<double, 3> Omega = eta.tail(3); // Get last 3 elements
-    Eigen::Matrix<double, 6, 6> J_Theta;
-    J_Theta << rotation_matrix_eb(Omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), transformation_matrix(Omega);
-
-    return J_Theta;
 }

@@ -17,6 +17,7 @@ find_package(Eigen3 REQUIRED)
 find_package(SFML COMPONENTS graphics REQUIRED)
 find_package(jsoncpp REQUIRED)
 
+find_package(aaveq_dynamics REQUIRED)
 find_package(aaveq_ros_interfaces REQUIRED)
 
 ############################################################################
@@ -58,6 +59,7 @@ install(
 ## usv
 add_library(usv src/usv.cpp)
 target_link_libraries(usv actuator propeller Eigen3::Eigen jsoncpp)
+ament_target_dependencies(usv aaveq_dynamics)
 ament_export_targets(usv HAS_LIBRARY_TARGET)
 
 install(

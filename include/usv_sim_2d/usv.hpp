@@ -4,6 +4,8 @@
 #include <time.h>
 #include <Eigen/Dense>
 
+#include "aaveq_dynamics/adynamics.hpp"
+
 #include "usv_sim_2d/actuator.hpp"
 
 class USV

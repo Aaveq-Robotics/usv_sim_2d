@@ -22,14 +22,6 @@ public:
         Eigen::Vector3d velocity;
     } state;
 
-    struct PointMass
-    {
-        double m;
-        double x;
-        double y;
-        double z;
-    };
-
     USV();
     ~USV() {}
 
@@ -44,7 +36,7 @@ public:
 
 private:
     // Member variables
-    std::vector<PointMass> points_of_mass_;
+    std::vector<ADynamics::PointMass> points_of_mass_;
     std::vector<Eigen::Vector3d> points_of_mass_earth_;
     std::vector<Eigen::Vector3d> points_of_hull_;
     std::vector<Eigen::Vector3d> points_of_hull_earth_;
@@ -67,14 +59,14 @@ private:
     double get_time();
     double update_timestamp();
     void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);
-    double compute_mass(const std::vector<PointMass> &points);
-    Eigen::Vector3d compute_com(const std::vector<PointMass> &points, const double &mass);
     Eigen::Vector3d recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com);
     std::vector<Eigen::Vector3d> recompute_relative_to_origin(const std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &com);
     PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
     std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
     Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);
     Eigen::Matrix<double, 6, 6> matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix);
+    double compute_mass(const std::vector<ADynamics::PointMass> &points);
+    Eigen::Vector3d compute_com(const std::vector<ADynamics::PointMass> &points, const double &mass);
 
     Eigen::Matrix3d inertia_matrix(const std::vector<PointMass> &points);
     Eigen::Matrix<double, 6, 6> mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix);

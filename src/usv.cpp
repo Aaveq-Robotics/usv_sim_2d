@@ -27,7 +27,7 @@ void USV::load_vessel_config(std::string vessel_config_path)
 
     // Load points of mass
     for (auto point : vessel_config["points_of_mass"])
-        points_of_mass_.push_back({point["m"].asDouble(), point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+        points_of_mass_.push_back(ADynamics::PointMass({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble(), point["m"].asDouble()}));
 
     for (auto point : vessel_config["hull_shape"])
         points_of_hull_.push_back({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
@@ -95,8 +95,8 @@ bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
     points_of_mass_earth_.clear();
     for (auto p : points_of_mass_)
     {
-        Eigen::Vector3d p_body{p.x, p.y, p.z};
         Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        Eigen::Vector3d p_body = p.head(3);
         points_of_mass_earth_.push_back(p_earth);
     }
 
@@ -167,23 +167,24 @@ void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_conditio
     eta_ = initial_condition;
 }
 
-double USV::compute_mass(const std::vector<USV::PointMass> &points)
+double USV::compute_mass(const std::vector<ADynamics::PointMass> &points)
 {
     double sum = 0.0;
     for (auto p : points)
-        sum += p.m;
+        sum += p.m();
 
     return sum;
 }
-Eigen::Vector3d USV::compute_com(const std::vector<USV::PointMass> &points, const double &mass)
+
+Eigen::Vector3d USV::compute_com(const std::vector<ADynamics::PointMass> &points, const double &mass)
 {
     // Compute center of mass
     Eigen::Vector3d com{0.0, 0.0, 0.0};
     for (auto p : points)
     {
-        com[0] += p.m * p.x;
-        com[1] += p.m * p.y;
-        com[2] += p.m * p.z;
+        com[0] += p.m() * p.x();
+        com[1] += p.m() * p.y();
+        com[2] += p.m() * p.z();
     }
 
     com[0] /= mass;

@@ -10,14 +10,14 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>eigen</exec_depend>
-  <exec_depend>sfml-dev</exec_depend>
-  <exec_depend>libjsoncpp-dev</exec_depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>eigen</depend>
+  <depend>sfml-dev</depend>
+  <depend>libjsoncpp-dev</depend>
 
-  <exec_depend>aaveq_dynamics</exec_depend>
-  <exec_depend>aaveq_ros_interfaces</exec_depend>
+  <depend>aaveq_dynamics</depend>
+  <depend>aaveq_ros_interfaces</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

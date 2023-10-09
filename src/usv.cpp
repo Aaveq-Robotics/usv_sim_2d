@@ -36,8 +36,8 @@ void USV::load_vessel_config(std::string vessel_config_path)
     origin_ = compute_com(points_of_mass_, mass_);
     points_of_mass_ = recompute_relative_to_origin(points_of_mass_, origin_); // Ensures that the USV position is equal to the origin
     points_of_hull_ = recompute_relative_to_origin(points_of_hull_, origin_); // Ensures that the USV position is equal to the origin
-    inertia_matrix_ = inertia_matrix(points_of_mass_);
-    mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
+    inertia_matrix_ = ADynamics::inertia_matrix(points_of_mass_);
+    mass_matrix_ = ADynamics::mass_matrix(mass_, inertia_matrix_);
 
     for (auto actuator_config : vessel_config["actuators"])
     {
@@ -78,14 +78,7 @@ bool USV::update_state(const Eigen::Vector<double, 6> &tau)
     Eigen::Vector<double, 6> state_earth_dot;
 
     // Rigid body dynamics
-    Eigen::Vector<double, 6> nu_dot = matrix_inverse(mass_matrix_) * tau - matrix_inverse(mass_matrix_) * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
-    nu_dot *= timestep;
-    nu_ += nu_dot;
-
-    // Body-fixed frame to earth-fixed frame
-    Eigen::Vector<double, 6> eta_dot = J_Theta(eta_) * nu_;
-    eta_dot *= timestep;
-    eta_ += eta_dot;
+    std::tie(state_body_, state_body_dot, state_earth_, state_earth_dot) = ADynamics::rigid_body_dynamics(timestep, tau, state_body_, state_earth_, mass_, inertia_matrix_, mass_matrix_);
 
     // Pass values
     state.gyro = state_body_.tail(3);
@@ -98,22 +91,22 @@ bool USV::update_state(const Eigen::Vector<double, 6> &tau)
     points_of_mass_earth_.clear();
     for (auto p : points_of_mass_)
     {
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
         Eigen::Vector3d p_body = p.head(3);
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
         points_of_mass_earth_.push_back(p_earth);
     }
 
     points_of_hull_earth_.clear();
     for (auto p_body : points_of_hull_)
     {
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * p_body;
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
         points_of_hull_earth_.push_back(p_earth);
     }
 
     points_of_actuators_earth_.clear();
     for (auto actuator : actuators_)
     {
-        Eigen::Vector3d p_earth = state.position + rotation_matrix_eb(state.attitude) * actuator->get_position();
+        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * actuator->get_position();
         points_of_actuators_earth_.push_back(p_earth);
     }
 
@@ -251,83 +244,3 @@ std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<
     return points_recomputed;
 }
 
-Eigen::Matrix3d USV::skew_symmetric_matrix(const Eigen::Vector3d &v)
-{
-    return Eigen::Matrix3d{{0, -v.z(), v.y()}, {v.z(), 0, -v.x()}, {-v.y(), v.x(), 0}};
-}
-
-Eigen::Matrix<double, 6, 6> USV::matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix)
-{
-    const float epsilon = 1e-6f; // Small tolerance value
-
-    if (matrix.determinant() > epsilon)
-        return matrix.inverse();
-    else
-        return matrix.completeOrthogonalDecomposition().pseudoInverse();
-}
-
-Eigen::Matrix3d USV::inertia_matrix(const std::vector<USV::PointMass> &points)
-{
-    auto inertia = [](double x, double y, double z) -> Eigen::Matrix3d
-    {
-        return Eigen::Matrix3d{{std::pow(y, 2) + std::pow(z, 2), -x * y, -x * z},
-                               {-x * y, std::pow(x, 2) + std::pow(z, 2), -y * z},
-                               {-x * z, -y * z, std::pow(x, 2) + std::pow(y, 2)}};
-    };
-
-    Eigen::Matrix3d I;
-    for (auto p : points)
-        I += p.m * inertia(p.x, p.y, p.z);
-
-    return I;
-}
-
-Eigen::Matrix<double, 6, 6> USV::mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix)
-{
-    Eigen::Matrix<double, 6, 6> mass_matrix;
-    mass_matrix << mass * Eigen::Matrix3d::Identity(), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), inertia_matrix;
-
-    return mass_matrix;
-}
-
-Eigen::Matrix<double, 6, 6> USV::coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu)
-{
-    Eigen::Vector<double, 3> omega = nu.tail(3); // Get last 3 elements
-    Eigen::Matrix<double, 6, 6> coriolis_matrix;
-    coriolis_matrix << mass * skew_symmetric_matrix(omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), -skew_symmetric_matrix(inertia_matrix * omega);
-
-    return coriolis_matrix;
-}
-
-Eigen::Matrix3d USV::rotation_matrix_eb(const Eigen::Vector3d &attitude)
-{
-    double phi = attitude.x();
-    double theta = attitude.y();
-    double psi = attitude.z();
-
-    // Rotation of earth-fixed (NED) frame with respect to body-fixed frame
-    Eigen::Matrix3d Rx{{1, 0, 0}, {0, cos(phi), -sin(phi)}, {0, sin(phi), cos(phi)}};
-    Eigen::Matrix3d Ry{{cos(theta), 0, sin(theta)}, {0, 1, 0}, {-sin(theta), 0, cos(theta)}};
-    Eigen::Matrix3d Rz{{cos(psi), -sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
-
-    return Rz * Ry * Rx;
-}
-
-Eigen::Matrix3d USV::transformation_matrix(const Eigen::Vector3d &attitude)
-{
-    double phi = attitude.x();
-    double theta = attitude.y();
-
-    return Eigen::Matrix3d{{1, sin(phi) * (sin(theta) / cos(theta)), cos(phi) * (sin(theta) / cos(theta))},
-                           {0, cos(phi), -sin(phi)},
-                           {0, sin(phi) / cos(theta), cos(phi) / cos(theta)}};
-}
-
-Eigen::Matrix<double, 6, 6> USV::J_Theta(const Eigen::Vector<double, 6> &eta)
-{
-    Eigen::Vector<double, 3> Omega = eta.tail(3); // Get last 3 elements
-    Eigen::Matrix<double, 6, 6> J_Theta;
-    J_Theta << rotation_matrix_eb(Omega), Eigen::Matrix3d::Zero(), Eigen::Matrix3d::Zero(), transformation_matrix(Omega);
-
-    return J_Theta;
-}

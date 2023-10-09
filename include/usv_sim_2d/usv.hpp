@@ -27,7 +27,6 @@ public:
 
     void load_vessel_config(std::string vessel_config_path);
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
-    bool rigid_body_dynamics(const Eigen::Vector<double, 6> &tau);
     bool update_state(const Eigen::Vector<double, 6> &tau);
 
     std::vector<Eigen::Vector3d> get_points_of_mass() { return points_of_mass_earth_; };
@@ -63,15 +62,7 @@ private:
     std::vector<Eigen::Vector3d> recompute_relative_to_origin(const std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &com);
     PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
     std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
-    Eigen::Matrix3d skew_symmetric_matrix(const Eigen::Vector3d &v);
-    Eigen::Matrix<double, 6, 6> matrix_inverse(const Eigen::Matrix<double, 6, 6> &matrix);
     double compute_mass(const std::vector<ADynamics::PointMass> &points);
     Eigen::Vector3d compute_com(const std::vector<ADynamics::PointMass> &points, const double &mass);
 
-    Eigen::Matrix3d inertia_matrix(const std::vector<PointMass> &points);
-    Eigen::Matrix<double, 6, 6> mass_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix);
-    Eigen::Matrix<double, 6, 6> coriolis_matrix(const double &mass, const Eigen::Matrix3d &inertia_matrix, const Eigen::Vector<double, 6> &nu);
-    Eigen::Matrix3d rotation_matrix_eb(const Eigen::Vector3d &attitude);
-    Eigen::Matrix3d transformation_matrix(const Eigen::Vector3d &attitude);
-    Eigen::Matrix<double, 6, 6> J_Theta(const Eigen::Vector<double, 6> &eta);
 };

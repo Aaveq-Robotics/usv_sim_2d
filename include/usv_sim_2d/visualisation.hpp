@@ -15,10 +15,21 @@ public:
 
 private:
     sf::RenderWindow window_;
-    sf::Vector2f origin_offset_;
+    sf::View view_;
 
-    const int zoom_ = 100;
+    float zoom_ = 100;
+    bool follow_vessel_ = true;
 
-    sf::Vector2f transform_coord_system(const Eigen::Vector3d &position);
-    void draw_grid(int rows, int cols);
+    sf::Texture texture_;
+    sf::Sprite sprite_;
+
+    void update_view(sf::RenderWindow &window, sf::View &view, sf::Vector2f size, float zoom);
+    sf::Vector2f eigen_2_sfml(const Eigen::Vector3d &position);
+
+    void draw_grid(sf::RenderWindow &window, sf::Vector2u grid_size);
+    void draw_axis(sf::RenderWindow &window, sf::Vector2u grid_size, const float &line_width);
+    void draw_wake_trail(sf::RenderWindow &window, const sf::Vector2f &position, const float &heading);
+    void draw_hull(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_hull);
+    void draw_actuators(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_actuators, const std::vector<double> &forces_actuators, const float &heading);
+    void draw_mass(sf::RenderWindow &window, const std::vector<Eigen::Vector3d> &points_mass);
 };

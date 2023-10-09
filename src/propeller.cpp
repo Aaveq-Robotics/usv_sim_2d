@@ -7,6 +7,8 @@ Propeller::Propeller(Json::Value properties) : Actuator(properties)
     ang_vel_min_ = properties["ang_vel_min"].asDouble();
     ang_vel_max_ = properties["ang_vel_max"].asDouble();
     k_t_ = properties["k_t"].asDouble();
+
+    max_propulsion_ = k_t_ * std::pow(ang_vel_max_, 2);
 }
 
 Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
@@ -18,7 +20,7 @@ Eigen::Vector<double, 6> Propeller::propulsion(const int &servo)
     // Ensure servo signals are within range
     if (servo != std::clamp(servo, SERVO_MIN, SERVO_MAX))
     {
-        std::cout << "[Propeller " << name_ << "]: servo was out of range" << '\n';
+        std::cout << "[Propeller " << name_ << "] servo was out of range" << '\n';
         return tau;
     }
 

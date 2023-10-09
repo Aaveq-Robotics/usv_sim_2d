@@ -15,6 +15,9 @@ public:
     ~Actuator() {}
 
     int get_servo_channel() { return servo_channel_; }
+    std::string get_type() { return type_; }
+    double get_max_propulsion() { return max_propulsion_; }
+    Eigen::Vector3d get_position() { return position_; }
     void set_position(Eigen::Vector3d position) { position_ = position; }
 
     virtual Eigen::Vector<double, 6> propulsion(const int &servo);
@@ -23,6 +26,7 @@ protected:
     int servo_channel_;
     std::string name_;
     std::string type_;
+    double max_propulsion_;
     Eigen::Vector3d position_;
     Eigen::Vector3d attitude_cartesian_;
 

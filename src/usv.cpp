@@ -67,7 +67,7 @@ Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &ser
     return tau;
 }
 
-bool USV::rigid_body_dynamics(const Eigen::Vector<double, 6> &tau)
+bool USV::update_state(const Eigen::Vector<double, 6> &tau)
 {
     // Update time
     double timestep = update_timestamp();

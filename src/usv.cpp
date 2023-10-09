@@ -190,9 +190,10 @@ Eigen::Vector3d USV::compute_com(const std::vector<ADynamics::PointMass> &points
     return com;
 }
 
-Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com)
+template <typename EigenVec>
+EigenVec USV::recompute_relative_to_origin(const EigenVec &point, const Eigen::Vector3d &com)
 {
-    Eigen::Vector3d point_recomputed = point;
+    EigenVec point_recomputed = point;
 
     // Recompute coordinates of points relative to com (origin)
     point_recomputed.x() -= com.x();
@@ -202,9 +203,10 @@ Eigen::Vector3d USV::recompute_relative_to_origin(const Eigen::Vector3d &point, 
     return point_recomputed;
 }
 
-std::vector<Eigen::Vector3d> USV::recompute_relative_to_origin(const std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &com)
+template <typename EigenVec>
+std::vector<EigenVec> USV::recompute_relative_to_origin(const std::vector<EigenVec> &points, const Eigen::Vector3d &com)
 {
-    std::vector<Eigen::Vector3d> points_recomputed = points;
+    std::vector<EigenVec> points_recomputed = points;
 
     // Recompute coordinates of points relative to com (origin)
     size_t i = 0;
@@ -216,31 +218,3 @@ std::vector<Eigen::Vector3d> USV::recompute_relative_to_origin(const std::vector
 
     return points_recomputed;
 }
-
-USV::PointMass USV::recompute_relative_to_origin(const USV::PointMass &point, const Eigen::Vector3d &com)
-{
-    USV::PointMass point_recomputed = point;
-
-    // Recompute coordinates of points relative to com (origin)
-    point_recomputed.x -= com.x();
-    point_recomputed.y -= com.y();
-    point_recomputed.z -= com.z();
-
-    return point_recomputed;
-}
-
-std::vector<USV::PointMass> USV::recompute_relative_to_origin(const std::vector<USV::PointMass> &points, const Eigen::Vector3d &com)
-{
-    std::vector<USV::PointMass> points_recomputed = points;
-
-    // Recompute coordinates of points relative to com (origin)
-    size_t i = 0;
-    for (auto point : points_recomputed)
-    {
-        points_recomputed[i] = recompute_relative_to_origin(point, com);
-        i++;
-    }
-
-    return points_recomputed;
-}
-

@@ -41,11 +41,10 @@ private:
     std::vector<Eigen::Vector3d> points_of_hull_;
     std::vector<Eigen::Vector3d> points_of_hull_earth_;
     std::vector<Eigen::Vector3d> points_of_actuators_earth_;
+    std::vector<Actuator *> actuators_;
     std::vector<double> forces_of_actuators_;
     Eigen::Vector3d origin_;
     double mass_;
-
-    std::vector<Actuator *> actuators_;
 
     Eigen::Vector<double, 6> state_body_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     Eigen::Vector<double, 6> state_earth_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -58,11 +57,11 @@ private:
     double get_time();
     double update_timestamp();
     void set_initial_condition(const Eigen::Vector<double, 6> &initial_condition);
-    Eigen::Vector3d recompute_relative_to_origin(const Eigen::Vector3d &point, const Eigen::Vector3d &com);
-    std::vector<Eigen::Vector3d> recompute_relative_to_origin(const std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &com);
-    PointMass recompute_relative_to_origin(const PointMass &point, const Eigen::Vector3d &com);
-    std::vector<PointMass> recompute_relative_to_origin(const std::vector<PointMass> &points, const Eigen::Vector3d &com);
     double compute_mass(const std::vector<ADynamics::PointMass> &points);
     Eigen::Vector3d compute_com(const std::vector<ADynamics::PointMass> &points, const double &mass);
 
+    template <typename EigenVec>
+    EigenVec recompute_relative_to_origin(const EigenVec &point, const Eigen::Vector3d &com);
+    template <typename EigenVec>
+    std::vector<EigenVec> recompute_relative_to_origin(const std::vector<EigenVec> &points, const Eigen::Vector3d &com);
 };

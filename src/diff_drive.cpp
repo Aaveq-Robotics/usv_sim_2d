@@ -2,24 +2,19 @@
 
 DiffDrive::DiffDrive()
 {
-    point_list.push_back({0.0, 0.0, 0.0}); // Point at origin of boat
+    set_initial_condition({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+
+    point_list_body_.push_back({10.0, 100.0, 0.0, 0.0}); // {m, x, y, z}
+    point_list_body_.push_back({15.0, 0.0, 25.0, 0.0});
+    point_list_body_.push_back({15.0, 0.0, -25.0, 0.0});
+
+    mass_ = sum_mass(point_list_body_);
+    point_list_body_ = recompute_relative_to_origin(point_list_body_);
+    inertia_matrix_ = inertia_matrix(point_list_body_);
+    mass_matrix_ = mass_matrix(mass_, inertia_matrix_);
 }
 
-bool DiffDrive::update(std::array<uint16_t, 16> servo_out)
+Eigen::Vector<double, 6> DiffDrive::compute_forces(const std::array<uint16_t, 16> &servo_out)
 {
-    // Update time
-    double timestep = update_timestamp();
-    if (timestep < 0.0)
-        return false;
-
-    // update the state
-    double max_vel = 50.0;
-    double vel = max_vel * timestep;
-    state.position = state_old.position + Eigen::Vector3d{vel, vel, 0.0};
-
-    // step the sim forward
-    state_old = state;
-
-    // update successful
-    return true;
+    return Eigen::Vector<double, 6>{1000.0, 0.0, 0.0, 0.0, 0.0, 10000.0};
 }

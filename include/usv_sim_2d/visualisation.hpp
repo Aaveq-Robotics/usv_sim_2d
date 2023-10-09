@@ -14,6 +14,7 @@ public:
 
 private:
     sf::RenderWindow window_;
-
     sf::Vector2f origin_offset;
+
+    void draw_grid(int rows, int cols);
 };

@@ -29,7 +29,7 @@ cd ~/ros_ws/
 
 ##  2. <a name='Requirements'></a>Requirements
 Tested with:
-- Ubuntu 22.04
+- Ubuntu 22.04 (Jammy Jellyfish)
 - ROS 2 (Humble Hawksbill)
 
 ---

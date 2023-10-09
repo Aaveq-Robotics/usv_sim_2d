@@ -48,9 +48,8 @@ private:
 
     std::vector<Actuator *> actuators_;
 
-    Eigen::Vector<double, 6> nu_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    Eigen::Vector<double, 6> eta_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
+    Eigen::Vector<double, 6> state_body_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    Eigen::Vector<double, 6> state_earth_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     Eigen::Matrix3d inertia_matrix_;
     Eigen::Matrix<double, 6, 6> mass_matrix_;
 

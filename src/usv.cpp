@@ -74,6 +74,9 @@ bool USV::update_state(const Eigen::Vector<double, 6> &tau)
     if (timestep < 0.0)
         return false;
 
+    Eigen::Vector<double, 6> state_body_dot;
+    Eigen::Vector<double, 6> state_earth_dot;
+
     // Rigid body dynamics
     Eigen::Vector<double, 6> nu_dot = matrix_inverse(mass_matrix_) * tau - matrix_inverse(mass_matrix_) * coriolis_matrix(mass_, inertia_matrix_, nu_) * nu_;
     nu_dot *= timestep;
@@ -85,11 +88,11 @@ bool USV::update_state(const Eigen::Vector<double, 6> &tau)
     eta_ += eta_dot;
 
     // Pass values
-    state.gyro = nu_.tail(3);
-    state.accel = nu_dot.head(3);
-    state.position = eta_.head(3);
-    state.attitude = eta_.tail(3);
-    state.velocity = eta_dot.head(3);
+    state.gyro = state_body_.tail(3);
+    state.accel = state_body_dot.head(3);
+    state.position = state_earth_.head(3);
+    state.attitude = state_earth_.tail(3);
+    state.velocity = state_earth_dot.head(3);
 
     // Body to Earth
     points_of_mass_earth_.clear();
@@ -164,7 +167,7 @@ double USV::update_timestamp()
 
 void USV::set_initial_condition(const Eigen::Vector<double, 6> &initial_condition)
 {
-    eta_ = initial_condition;
+    state_earth_ = initial_condition;
 }
 
 double USV::compute_mass(const std::vector<ADynamics::PointMass> &points)

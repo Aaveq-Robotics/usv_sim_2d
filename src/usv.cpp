@@ -87,28 +87,15 @@ bool USV::update_state(const Eigen::Vector<double, 6> &tau)
     state.attitude = state_earth_.tail(3);
     state.velocity = state_earth_dot.head(3);
 
+    // Extract actuator positions
+    std::vector<Eigen::Vector3d> actuator_positons;
+    std::for_each(actuators_.begin(), actuators_.end(), [&actuator_positons](Actuator *actuator)
+                  { actuator_positons.push_back(actuator->get_position()); });
+
     // Body to Earth
-    points_of_mass_earth_.clear();
-    for (auto p : points_of_mass_)
-    {
-        Eigen::Vector3d p_body = p.head(3);
-        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
-        points_of_mass_earth_.push_back(p_earth);
-    }
-
-    points_of_hull_earth_.clear();
-    for (auto p_body : points_of_hull_)
-    {
-        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * p_body;
-        points_of_hull_earth_.push_back(p_earth);
-    }
-
-    points_of_actuators_earth_.clear();
-    for (auto actuator : actuators_)
-    {
-        Eigen::Vector3d p_earth = state.position + ADynamics::rotation_matrix_eb(state.attitude) * actuator->get_position();
-        points_of_actuators_earth_.push_back(p_earth);
-    }
+    points_of_actuators_earth_ = ADynamics::body_to_earth(actuator_positons, state.position, state.attitude);
+    points_of_hull_earth_ = ADynamics::body_to_earth(points_of_hull_, state.position, state.attitude);
+    points_of_mass_earth_ = ADynamics::body_to_earth(points_of_mass_, state.position, state.attitude);
 
     // update successful
     return true;

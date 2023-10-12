@@ -57,23 +57,10 @@ void USV::load_vessel_config(std::string vessel_config_path)
     }
 }
 
-Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)
+bool USV::update_state(const std::array<uint16_t, 16> &servo_out)
 {
-    Eigen::Vector<double, 6> tau{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    Eigen::Vector<double, 6> tau = compute_forces(servo_out);
 
-    forces_of_actuators_.clear();
-    for (auto actuator : actuators_)
-    {
-        Eigen::Vector<double, 6> tau_actuator = actuator->propulsion(servo_out[actuator->get_servo_channel()]);
-        forces_of_actuators_.push_back(tau_actuator.head(3).sum() / actuator->get_max_propulsion());
-        tau += tau_actuator;
-    }
-
-    return tau;
-}
-
-bool USV::update_state(const Eigen::Vector<double, 6> &tau)
-{
     // Update time
     double timestep = update_timestamp();
     if (timestep < 0.0)
@@ -114,6 +101,31 @@ Actuator *USV::create_actuator(Json::Value actuator_config)
         return new Propeller(actuator_config);
     else
         return new Actuator;
+}
+
+Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &servo_out)
+{
+    Eigen::Vector<double, 6> tau{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    // Actuators
+    forces_of_actuators_.clear();
+    Eigen::Vector<double, 6> tau_actuators{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    for (auto actuator : actuators_)
+    {
+        Eigen::Vector<double, 6> tau_actuator = actuator->propulsion(servo_out[actuator->get_servo_channel()]);
+        forces_of_actuators_.push_back(tau_actuator.head(3).sum() / actuator->get_max_propulsion());
+        tau_actuators += tau_actuator;
+    }
+
+    // Drag
+    Eigen::Vector3d tau_drag_translation = ADynamics::drag(state.velocity, 0.05, drag_coeff_, 997.0);
+    tau_drag_translation = ADynamics::rotation_matrix_eb(state.attitude).inverse() * tau_drag_translation;
+    Eigen::Vector<double, 6> tau_drag;
+    tau_drag << tau_drag_translation, Eigen::Vector3d{0.0, 0.0, 0.0};
+
+    tau = tau_actuators + tau_drag;
+
+    return tau;
 }
 
 double USV::get_time()

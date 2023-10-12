@@ -43,8 +43,9 @@ private:
     std::vector<Eigen::Vector3d> points_of_actuators_earth_;
     std::vector<Actuator *> actuators_;
     std::vector<double> forces_of_actuators_;
-    Eigen::Vector3d origin_;
     double mass_;
+    double drag_coeff_;
+    double hull_depth_;
 
     Eigen::Vector<double, 6> state_body_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     Eigen::Vector<double, 6> state_earth_{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};

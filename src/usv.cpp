@@ -25,20 +25,25 @@ void USV::load_vessel_config(std::string vessel_config_path)
     Json::Value vessel_config;
     vessel_config_file >> vessel_config;
 
-    // Load points of mass
+    // Load hull
+    drag_coeff_ = vessel_config["hull"]["drag_coeff"].asDouble();
+    hull_depth_ = vessel_config["hull"]["hull_depth"].asDouble();
+
+    for (auto point : vessel_config["hull"]["hull_shape"])
+        points_of_hull_.push_back({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
+
+    // Load mass
     for (auto point : vessel_config["points_of_mass"])
         points_of_mass_.push_back(ADynamics::PointMass({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble(), point["m"].asDouble()}));
 
-    for (auto point : vessel_config["hull_shape"])
-        points_of_hull_.push_back({point["x"].asDouble(), point["y"].asDouble(), point["z"].asDouble()});
-
     mass_ = compute_mass(points_of_mass_);
-    origin_ = compute_com(points_of_mass_, mass_);
-    points_of_mass_ = recompute_relative_to_origin(points_of_mass_, origin_); // Ensures that the USV position is equal to the origin
-    points_of_hull_ = recompute_relative_to_origin(points_of_hull_, origin_); // Ensures that the USV position is equal to the origin
+    Eigen::Vector3d origin = compute_com(points_of_mass_, mass_);
+    points_of_mass_ = recompute_relative_to_origin(points_of_mass_, origin); // Ensures that the USV position is equal to the origin
+    points_of_hull_ = recompute_relative_to_origin(points_of_hull_, origin); // Ensures that the USV position is equal to the origin
     inertia_matrix_ = ADynamics::inertia_matrix(points_of_mass_);
     mass_matrix_ = ADynamics::mass_matrix(mass_, inertia_matrix_);
 
+    // Load actuators
     for (auto actuator_config : vessel_config["actuators"])
     {
         Eigen::Vector3d position;
@@ -47,7 +52,7 @@ void USV::load_vessel_config(std::string vessel_config_path)
         position[2] = actuator_config["position"]["z"].asDouble();
 
         Actuator *actuator = create_actuator(actuator_config);
-        actuator->set_position(recompute_relative_to_origin(position, origin_));
+        actuator->set_position(recompute_relative_to_origin(position, origin));
         actuators_.push_back(actuator);
     }
 }

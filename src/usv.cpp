@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <jsoncpp/json/json.h>
 
 #include "usv_sim_2d/propeller.hpp"
@@ -118,15 +119,66 @@ Eigen::Vector<double, 6> USV::compute_forces(const std::array<uint16_t, 16> &ser
         tau_actuators += tau_actuator;
     }
 
-    // Drag
-    Eigen::Vector3d tau_drag_translation = ADynamics::drag(state.velocity, 0.05, drag_coeff_, 997.0);
-    tau_drag_translation = ADynamics::rotation_matrix_eb(state.attitude).inverse() * tau_drag_translation;
-    Eigen::Vector<double, 6> tau_drag;
-    tau_drag << tau_drag_translation, Eigen::Vector3d{0.0, 0.0, 0.0};
+    // Compute drag for every hull line segment
+    Eigen::Vector<double, 6> tau_drag = drag_hull(state.velocity, state.attitude, points_of_hull_, hull_depth_, drag_coeff_);
 
     tau = tau_actuators + tau_drag;
 
+    std::cout << "Rotation drag: " << tau.tail(3).z() << '\n';
+    std::cout << "Translation drag: " << '\n';
+    std::cout << tau.head(2) << '\n';
+    std::cout << "---" << '\n';
+
+    std::cout << "Rotation: " << tau.tail(3).z() << '\n';
+    std::cout << "Translation: " << '\n';
+    std::cout << tau.head(2) << '\n';
+    std::cout << "------------" << '\n';
+
     return tau;
+}
+
+Eigen::Vector<double, 6> USV::drag_hull(Eigen::Vector3d velocity, Eigen::Vector3d attitude, std::vector<Eigen::Vector3d> points_hull, double hull_depth, double drag_coeff)
+{
+    if (velocity.norm() == 0.0)
+        return Eigen::Vector<double, 6>{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    Eigen::Vector3d tau_drag_translation{0.0, 0.0, 0.0};
+    Eigen::Vector3d tau_drag_rotation{0.0, 0.0, 0.0};
+
+    typedef std::vector<Eigen::Vector3d>::iterator Iterator;
+    for (Iterator it = points_hull.begin(); it < points_hull.end(); it++)
+    {
+        Eigen::Vector3d point_current = *it;
+        Eigen::Vector3d point_prev;
+        if (it != points_hull.begin())
+            point_prev = *(it - 1);
+        else
+            point_prev = *(points_hull.end() - 1);
+
+        // Translation
+        Eigen::Vector3d vec_seg = point_current - point_prev;
+
+        // Check wether side is facing stream
+        if (vec_seg.cross(velocity).z() < 0.0)
+            continue;
+
+        //  Angle from b to a: θ = cos⁻¹((a. b) / (|a| |b|))
+        double angle = acos(vec_seg.dot(velocity) / (vec_seg.norm() * velocity.norm()));
+        double area = sin(angle) * vec_seg.norm() * hull_depth;
+        Eigen::Vector3d drag_seg = ADynamics::drag(velocity, area, drag_coeff, 997.0);
+        drag_seg = ADynamics::rotation_matrix_eb(attitude).inverse() * drag_seg;
+        tau_drag_translation += drag_seg;
+
+        // Rotation
+        // Eigen::Vector3d point_centre = point_prev + vec_seg * 0.5;
+        // tau_drag_rotation += point_centre.cross(drag_seg);
+    }
+
+    // tau_drag_translation = ADynamics::rotation_matrix_eb(attitude).inverse() * tau_drag_translation;
+    Eigen::Vector<double, 6> tau_drag;
+    tau_drag << tau_drag_translation, tau_drag_rotation;
+
+    return tau_drag;
 }
 
 double USV::get_time()

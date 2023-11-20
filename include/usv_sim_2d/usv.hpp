@@ -55,6 +55,7 @@ private:
     // Member functions
     Actuator *create_actuator(Json::Value actuator_config);
     Eigen::Vector<double, 6> compute_forces(const std::array<uint16_t, 16> &servo_out);
+    Eigen::Vector<double, 6> drag_hull(Eigen::Vector3d velocity, Eigen::Vector3d attitude, std::vector<Eigen::Vector3d> points_hull, double hull_depth, double drag_coeff);
 
     double get_time();
     double update_timestamp();

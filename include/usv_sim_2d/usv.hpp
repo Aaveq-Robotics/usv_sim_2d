@@ -15,11 +15,12 @@ public:
     {
         double timestamp = 0.0;
 
-        Eigen::Vector3d gyro;
-        Eigen::Vector3d accel;
         Eigen::Vector3d position;
-        Eigen::Vector3d attitude;
         Eigen::Vector3d velocity;
+        Eigen::Vector3d acceleration;
+        Eigen::Vector3d attitude;
+        Eigen::Vector3d angular_velocity;
+        Eigen::Vector3d angular_acceleration;
     } state;
 
     USV();

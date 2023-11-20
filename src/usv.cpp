@@ -11,11 +11,11 @@ USV::USV()
 
     // Init state
     state.timestamp = USV::get_time();
-    state.gyro = {0.0, 0.0, 0.0};
-    state.accel = {0.0, 0.0, 0.0};
     state.position = {0.0, 0.0, 0.0};
-    state.attitude = {0.0, 0.0, 0.0};
     state.velocity = {0.0, 0.0, 0.0};
+    state.acceleration = {0.0, 0.0, 0.0};
+    state.attitude = {0.0, 0.0, 0.0};
+    state.angular_acceleration = {0.0, 0.0, 0.0};
 }
 
 void USV::load_vessel_config(std::string vessel_config_path)
@@ -73,11 +73,12 @@ bool USV::update_state(const std::array<uint16_t, 16> &servo_out)
     std::tie(state_body_, state_body_dot, state_earth_, state_earth_dot) = ADynamics::rigid_body_dynamics(timestep, tau, state_body_, state_earth_, mass_, inertia_matrix_, mass_matrix_);
 
     // Pass values
-    state.gyro = state_body_.tail(3);
-    state.accel = state_body_dot.head(3);
     state.position = state_earth_.head(3);
-    state.attitude = state_earth_.tail(3);
     state.velocity = state_earth_dot.head(3);
+    state.acceleration = state_body_dot.head(3);
+    state.attitude = state_earth_.tail(3);
+    state.angular_velocity = state_earth_dot.tail(3);
+    state.angular_acceleration = state_body_.tail(3);
 
     // Extract actuator positions
     std::vector<Eigen::Vector3d> actuator_positons;

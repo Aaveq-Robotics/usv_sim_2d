@@ -72,13 +72,13 @@ private:
 
         msg_state.timestamp = usv_.state.timestamp;
 
-        msg_state.gyro.x = usv_.state.gyro.x(); // Roll
-        msg_state.gyro.y = usv_.state.gyro.y(); // Pitch
-        msg_state.gyro.z = usv_.state.gyro.z(); // Yaw
+        msg_state.gyro.x = usv_.state.angular_acceleration.x(); // Roll
+        msg_state.gyro.y = usv_.state.angular_acceleration.y(); // Pitch
+        msg_state.gyro.z = usv_.state.angular_acceleration.z(); // Yaw
 
-        msg_state.accel.x = usv_.state.accel.x();
-        msg_state.accel.y = usv_.state.accel.y();
-        msg_state.accel.z = usv_.state.accel.z();
+        msg_state.accel.x = usv_.state.acceleration.x();
+        msg_state.accel.y = usv_.state.acceleration.y();
+        msg_state.accel.z = usv_.state.acceleration.z();
 
         msg_state.position.x = usv_.state.position.x();
         msg_state.position.y = usv_.state.position.y();

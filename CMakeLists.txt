@@ -95,12 +95,17 @@ target_link_libraries(sim usv visualisation)
 # servo_test
 add_executable(servo_test nodes/servo_test.cpp)
 ament_target_dependencies(servo_test rclcpp aaveq_ros_interfaces)
-target_link_libraries(servo_test usv visualisation)
+
+# servo_keyboard
+add_executable(servo_keyboard nodes/servo_keyboard.cpp)
+ament_target_dependencies(servo_keyboard rclcpp aaveq_ros_interfaces)
+target_link_libraries(servo_keyboard sfml-graphics)
 
 
 install(TARGETS
   sim
   servo_test
+  servo_keyboard
 DESTINATION lib/${PROJECT_NAME})
 
 ############################################################################
